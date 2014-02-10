@@ -23,7 +23,7 @@ use std::mem::{to_be16, from_be16, to_be32, from_be32};
 use std::{os, rand, vec};
 
 fn send_tcp_synack(sk: cookie::SipHashKey, pcap: &Pcap,
-                   dissector: PacketDissector) {
+                   dissector: PacketDissector, uts: u64) {
     let ref s_etherhdr: EtherHeader = unsafe { *dissector.etherhdr_ptr };
     assert!(s_etherhdr.ether_type == to_be16(ETHERTYPE_IP as i16) as u16);
     let ref s_iphdr: IpHeader = unsafe { *dissector.iphdr_ptr };
@@ -44,8 +44,7 @@ fn send_tcp_synack(sk: cookie::SipHashKey, pcap: &Pcap,
     sa_packet.tcphdr.th_seq =
         cookie::tcp(sa_packet.iphdr.ip_src, sa_packet.iphdr.ip_dst,
                     sa_packet.tcphdr.th_sport, sa_packet.tcphdr.th_dport,
-                    s_iphdr.ip_id, sk,
-                    time::precise_time_ns() & 0x1000000000);
+                    s_iphdr.ip_id, sk, uts);
     checksum::tcp_header(&sa_packet.iphdr, &mut sa_packet.tcphdr);
 
     let sa_packet_v = unsafe { vec::from_buf(transmute(&sa_packet),
@@ -53,12 +52,11 @@ fn send_tcp_synack(sk: cookie::SipHashKey, pcap: &Pcap,
     pcap.send_packet(sa_packet_v);
 }
 
-fn log_tcp_ack(sk: cookie::SipHashKey, dissector: PacketDissector) {
+fn log_tcp_ack(sk: cookie::SipHashKey, dissector: PacketDissector, uts: u64) {
     let ref s_iphdr: IpHeader = unsafe { *dissector.iphdr_ptr };
     let ref s_tcphdr: TcpHeader = unsafe { *dissector.tcphdr_ptr };
     let wanted_ip_id = to_be16(
         (from_be16(s_iphdr.ip_id as i16) as u16 - 2u16) as i16) as u16;
-    let uts = time::precise_time_ns() & 0x1000000000;
     let ack_cookie = cookie::tcp(s_iphdr.ip_dst, s_iphdr.ip_src,
                                  s_tcphdr.th_dport, s_tcphdr.th_sport,
                                  wanted_ip_id, sk, uts);
@@ -114,12 +112,13 @@ fn main() {
                 continue;
             }
         };
+        let uts = time::precise_time_ns() & 0x1000000000;
         let th_flags = unsafe { *dissector.tcphdr_ptr }.th_flags;
         if th_flags == TH_SYN {
-            send_tcp_synack(sk, &pcap, dissector);
+            send_tcp_synack(sk, &pcap, dissector, uts);
         } else if (th_flags & (TH_PUSH | TH_ACK)) == (TH_PUSH | TH_ACK) &&
             (th_flags & TH_SYN) == 0 {
-            log_tcp_ack(sk, dissector);
+            log_tcp_ack(sk, dissector, uts);
         }
     }
 }
