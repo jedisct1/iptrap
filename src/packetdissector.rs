@@ -3,8 +3,8 @@ extern mod std;
 
 use std::cast::transmute;
 use std::mem::size_of;
+use std::mem::{to_be16, from_be16};
 use std::ptr;
-use std::unstable::intrinsics::{to_be16, from_be16};
 use std::vec;
 
 pub static ETHERTYPE_IP: u16 = 0x0800;

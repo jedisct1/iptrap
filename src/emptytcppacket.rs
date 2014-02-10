@@ -1,7 +1,7 @@
 
 use packetdissector::{EtherHeader, IpHeader, TcpHeader};
 use packetdissector::{ETHERTYPE_IP, IPPROTO_TCP};
-use std::unstable::intrinsics::to_be16;
+use std::mem::to_be16;
 use std::mem::size_of;
 use std::rand;
 

@@ -3,7 +3,7 @@ use packetdissector::{IpHeader, TcpHeader};
 use std::cast::transmute;
 use std::iter;
 use std::mem::size_of_val;
-use std::unstable::intrinsics::to_be16;
+use std::mem::to_be16;
 use std::vec;
 
 pub fn ip_header(iphdr: &mut IpHeader) {

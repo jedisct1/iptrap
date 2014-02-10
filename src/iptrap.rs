@@ -17,8 +17,7 @@ use iptrap::{checksum, cookie};
 use std::cast::transmute;
 use std::io::net::ip::IpAddr;
 use std::mem::size_of_val;
-use std::unstable::intrinsics::{to_be16, from_be16};
-use std::unstable::intrinsics::{to_be32, from_be32};
+use std::mem::{to_be16, from_be16, to_be32, from_be32};
 use std::{os, rand, vec};
 
 fn send_tcp_synack(sk: cookie::SipHashKey, pcap: &Pcap,
