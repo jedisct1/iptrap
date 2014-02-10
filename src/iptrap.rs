@@ -18,8 +18,11 @@ use iptrap::{TH_SYN, TH_ACK, TH_PUSH};
 use iptrap::{checksum, cookie};
 use std::cast::transmute;
 use std::io::net::ip::IpAddr;
+use std::libc::funcs::posix88::unistd;
 use std::mem::size_of_val;
 use std::mem::{to_be16, from_be16, to_be32, from_be32};
+use std::rt::thread::Thread;
+use std::sync::atomics::{AtomicBool, Relaxed, INIT_ATOMIC_BOOL};
 use std::{os, rand, vec};
 
 fn send_tcp_synack(sk: cookie::SipHashKey, pcap: &Pcap,
@@ -80,6 +83,17 @@ fn usage() {
     println!("Usage: iptrap <device> <local ip address>");
 }
 
+fn spawn_time_updater(time_needs_update: &'static mut AtomicBool) {
+    Thread::spawn(proc() {
+            loop {
+                unsafe {
+                    time_needs_update.store(true, Relaxed);
+                    unistd::usleep(10 * 1_000_000);
+                }
+            }
+        });
+}
+
 fn main() {
     let args = os::args();
     if args.len() != 3 {
@@ -101,6 +115,10 @@ fn main() {
     let filter = PacketDissectorFilter {
         local_ip: local_ip
     };
+    static mut time_needs_update: AtomicBool = INIT_ATOMIC_BOOL;
+    unsafe { spawn_time_updater(&mut time_needs_update) };
+    let mut uts = time::precise_time_ns() & 0x1000000000;
+
     let mut pkt_opt: Option<PcapPacket>;
     while { pkt_opt = pcap.next_packet();
             pkt_opt.is_some() } {
@@ -112,7 +130,10 @@ fn main() {
                 continue;
             }
         };
-        let uts = time::precise_time_ns() & 0x1000000000;
+        if unsafe { time_needs_update.load(Relaxed) } != false {
+            unsafe { time_needs_update.store(false, Relaxed) };
+            uts = time::precise_time_ns() & 0x1000000000;
+        }
         let th_flags = unsafe { *dissector.tcphdr_ptr }.th_flags;
         if th_flags == TH_SYN {
             send_tcp_synack(sk, &pcap, dissector, uts);
