@@ -4,8 +4,10 @@
        unnecessary_qualification,
        managed_heap_memory)];
 
+extern mod extra;
 extern mod iptrap;
 
+use extra::time;
 use iptrap::ETHERTYPE_IP;
 use iptrap::EmptyTcpPacket;
 use iptrap::socketizableip::SocketizableIp;
@@ -42,7 +44,8 @@ fn send_tcp_synack(sk: cookie::SipHashKey, pcap: &Pcap,
     sa_packet.tcphdr.th_seq =
         cookie::tcp(sa_packet.iphdr.ip_src, sa_packet.iphdr.ip_dst,
                     sa_packet.tcphdr.th_sport, sa_packet.tcphdr.th_dport,
-                    s_iphdr.ip_id, sk);
+                    s_iphdr.ip_id, sk,
+                    time::precise_time_ns() & 0x1000000000);
     checksum::tcp_header(&sa_packet.iphdr, &mut sa_packet.tcphdr);
 
     let sa_packet_v = unsafe { vec::from_buf(transmute(&sa_packet),
@@ -55,14 +58,24 @@ fn log_tcp_ack(sk: cookie::SipHashKey, dissector: PacketDissector) {
     let ref s_tcphdr: TcpHeader = unsafe { *dissector.tcphdr_ptr };
     let wanted_ip_id = to_be16(
         (from_be16(s_iphdr.ip_id as i16) as u16 - 2u16) as i16) as u16;
+    let uts = time::precise_time_ns() & 0x1000000000;
     let ack_cookie = cookie::tcp(s_iphdr.ip_dst, s_iphdr.ip_src,
                                  s_tcphdr.th_dport, s_tcphdr.th_sport,
-                                 wanted_ip_id, sk);
+                                 wanted_ip_id, sk, uts);
     let wanted_cookie = to_be32((from_be32(ack_cookie as i32) as u32
                                  + 1u32) as i32) as u32;
     if s_tcphdr.th_ack != wanted_cookie {
-        return;
+        let uts_alt = uts - 0x1000000000;
+        let ack_cookie_alt = cookie::tcp(s_iphdr.ip_dst, s_iphdr.ip_src,
+                                         s_tcphdr.th_dport, s_tcphdr.th_sport,
+                                         wanted_ip_id, sk, uts_alt);
+        let wanted_cookie_alt = to_be32((from_be32(ack_cookie_alt as i32) as u32
+                                         + 1u32) as i32) as u32;
+        if s_tcphdr.th_ack != wanted_cookie_alt {
+            return;
+        }
     }
+    println!("cookie");
 }
 
 fn usage() {
