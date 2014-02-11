@@ -5,6 +5,7 @@
        managed_heap_memory)];
 
 extern mod extra;
+extern mod native;
 extern mod iptrap;
 
 use extra::time;
@@ -18,10 +19,8 @@ use iptrap::{TH_SYN, TH_ACK, TH_PUSH};
 use iptrap::{checksum, cookie};
 use std::cast::transmute;
 use std::io::net::ip::IpAddr;
-use std::libc::funcs::posix88::unistd;
 use std::mem::size_of_val;
 use std::mem::{to_be16, from_be16, to_be32, from_be32};
-use std::rt::thread::Thread;
 use std::sync::atomics::{AtomicBool, Relaxed, INIT_ATOMIC_BOOL};
 use std::{os, rand, vec};
 
@@ -84,14 +83,17 @@ fn usage() {
 }
 
 fn spawn_time_updater(time_needs_update: &'static mut AtomicBool) {
-    Thread::spawn(proc() {
+    spawn(proc() {
             loop {
-                unsafe {
-                    time_needs_update.store(true, Relaxed);
-                    unistd::usleep(10 * 1_000_000);
-                }
+                time_needs_update.store(true, Relaxed);
+                std::io::timer::sleep(10 * 1_000);
             }
         });
+}
+
+#[start]
+fn start(argc: int, argv: **u8) -> int {
+    native::start(argc, argv, main)
 }
 
 fn main() {
