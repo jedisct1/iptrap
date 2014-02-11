@@ -24,6 +24,8 @@ use std::mem::{to_be16, from_be16, to_be32, from_be32};
 use std::sync::atomics::{AtomicBool, Relaxed, INIT_ATOMIC_BOOL};
 use std::{os, rand, vec};
 
+pub mod zmq;
+
 fn send_tcp_synack(sk: cookie::SipHashKey, pcap: &Pcap,
                    dissector: PacketDissector, uts: u64) {
     let ref s_etherhdr: EtherHeader = unsafe { *dissector.etherhdr_ptr };
