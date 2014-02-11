@@ -11,14 +11,13 @@ extern mod iptrap;
 use extra::time;
 use iptrap::ETHERTYPE_IP;
 use iptrap::EmptyTcpPacket;
-use iptrap::socketizableip::SocketizableIp;
 use iptrap::{EtherHeader, IpHeader, TcpHeader};
 use iptrap::{PacketDissector, PacketDissectorFilter};
 use iptrap::{Pcap, PcapPacket, DataLinkTypeEthernet};
 use iptrap::{TH_SYN, TH_ACK};
 use iptrap::{checksum, cookie};
 use std::cast::transmute;
-use std::io::net::ip::IpAddr;
+use std::io::net::ip::{IpAddr, Ipv4Addr};
 use std::mem::size_of_val;
 use std::mem::{to_be16, to_be32, from_be32};
 use std::sync::atomics::{AtomicBool, Relaxed, INIT_ATOMIC_BOOL};
@@ -77,6 +76,7 @@ fn log_tcp_ack(zmq_ctx: &mut zmq::Socket, sk: cookie::SipHashKey,
         }
     }
     let _ = zmq_ctx.send(dissector.tcp_data, 0);
+    info!("Packet received");
 }
 
 fn usage() {
@@ -102,10 +102,14 @@ fn main() {
     if args.len() != 3 {
         return usage();
     }
-    let local_ip = match from_str::<IpAddr>(args[2]) {
+    let local_addr = match from_str::<IpAddr>(args[2]) {
         Some(local_ip) => local_ip,
         None => { return usage(); }
-    }.to_vec().unwrap();
+    };
+    let local_ip = match local_addr {
+        Ipv4Addr(a, b, c, d) => ~[a, b, c, d],
+        _ => fail!("Only IPv4 is supported for now")
+    };
     let pcap = Pcap::open_live(args[1]).unwrap();
     match pcap.data_link_type() {
         DataLinkTypeEthernet => (),
