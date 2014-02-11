@@ -56,7 +56,8 @@ fn send_tcp_synack(sk: cookie::SipHashKey, pcap: &Pcap,
     pcap.send_packet(sa_packet_v);
 }
 
-fn log_tcp_ack(sk: cookie::SipHashKey, dissector: PacketDissector, uts: u64) {
+fn log_tcp_ack(zmq_ctx: &mut zmq::Socket, sk: cookie::SipHashKey,
+               dissector: PacketDissector, uts: u64) {
     let ref s_iphdr: IpHeader = unsafe { *dissector.iphdr_ptr };
     let ref s_tcphdr: TcpHeader = unsafe { *dissector.tcphdr_ptr };
     let wanted_ip_id = to_be16(
@@ -77,7 +78,7 @@ fn log_tcp_ack(sk: cookie::SipHashKey, dissector: PacketDissector, uts: u64) {
             return;
         }
     }
-    println!("cookie");
+    let _ = zmq_ctx.send(dissector.tcp_data, 0);
 }
 
 fn usage() {
@@ -119,6 +120,10 @@ fn main() {
     let filter = PacketDissectorFilter {
         local_ip: local_ip
     };
+    let mut zmq_ctx = zmq::Context::new();
+    let mut zmq_socket = zmq_ctx.socket(zmq::PUB).unwrap();
+    let _ = zmq_socket.set_linger(1);
+    let _ = zmq_socket.bind("tcp://0.0.0.0:9922");
     static mut time_needs_update: AtomicBool = INIT_ATOMIC_BOOL;
     unsafe { spawn_time_updater(&mut time_needs_update) };
     let mut uts = time::precise_time_ns() & 0x1000000000;
@@ -143,7 +148,7 @@ fn main() {
             send_tcp_synack(sk, &pcap, dissector, uts);
         } else if (th_flags & (TH_PUSH | TH_ACK)) == (TH_PUSH | TH_ACK) &&
             (th_flags & TH_SYN) == 0 {
-            log_tcp_ack(sk, dissector, uts);
+            log_tcp_ack(&mut zmq_socket, sk, dissector, uts);
         }
     }
 }
