@@ -21,7 +21,8 @@ pub fn ip_header(iphdr: &mut IpHeader) {
 }
 
 pub fn tcp_header(iphdr: &IpHeader, tcphdr: &mut TcpHeader) {
-    let tcphdr_len = size_of_val(tcphdr);
+    let tcphdr_len = ((tcphdr.th_off_x2 >> 4) & 0xf) as uint * 4;
+    assert!(tcphdr_len >= size_of_val(tcphdr));
     let mut sum0: u64;
     sum0  = tcphdr_len as u64;
     sum0 += iphdr.ip_p as u64;

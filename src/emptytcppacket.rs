@@ -9,7 +9,8 @@ use std::rand;
 pub struct EmptyTcpPacket {
     etherhdr: EtherHeader,
     iphdr: IpHeader,
-    tcphdr: TcpHeader
+    tcphdr: TcpHeader,
+    tcpoptions: ~[u8]
 }
 
 impl EmptyTcpPacket {
@@ -19,11 +20,13 @@ impl EmptyTcpPacket {
             ether_shost: [0u8, ..6],
             ether_type: to_be16(ETHERTYPE_IP as i16) as u16
         };
+        let tcpoptions = ~[ 0x2u8, 0x4u8, 0x5u8, 0xb4u8 ];
         let iphdr = IpHeader {
             ip_vhl: (4u8 << 4) | (size_of::<IpHeader>() as u8 / 4u8),
             ip_tos: 0u8,
             ip_len: to_be16((size_of::<IpHeader>() +
-                             size_of::<TcpHeader>()) as i16) as u16,
+                             size_of::<TcpHeader>() +
+                             tcpoptions.len()) as i16) as u16,
             ip_id: rand::random(),
             ip_off: 0u16,
             ip_ttl: 42u8,
@@ -32,12 +35,14 @@ impl EmptyTcpPacket {
             ip_src: [0u8, ..4],
             ip_dst: [0u8, ..4]
         };
+        assert!(tcpoptions.len() % 4 == 0);
         let tcphdr = TcpHeader {
             th_sport: 0u16,
             th_dport: 0u16,
             th_seq: 0u32,
             th_ack: 0u32,
-            th_off_x2: (size_of::<TcpHeader>() / 4) as u8 << 4,
+            th_off_x2: ((size_of::<TcpHeader>() +
+                         tcpoptions.len()) / 4) as u8 << 4,
             th_flags: 0u8,
             th_win: 65535u16,
             th_sum: 0u16,
@@ -46,7 +51,8 @@ impl EmptyTcpPacket {
         EmptyTcpPacket {
             etherhdr: etherhdr,
             iphdr: iphdr,
-            tcphdr: tcphdr
+            tcphdr: tcphdr,
+            tcpoptions: tcpoptions
         }
     }
 }
