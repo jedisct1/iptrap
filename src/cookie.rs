@@ -8,13 +8,12 @@ pub struct SipHashKey {
 
 #[allow(unused_must_use)]
 pub fn tcp(ip_src: &[u8], ip_dst: &[u8], th_sport: u16, th_dport: u16,
-           ip_id: u16, sk: SipHashKey, uts: u64) -> u32 {
+           sk: SipHashKey, uts: u64) -> u32 {
     let mut hash = SipState::new(sk.k1, sk.k2);
     hash.write(ip_src);
     hash.write(ip_dst);
     hash.write_le_u16(th_sport);
     hash.write_le_u16(th_dport);
-    hash.write_le_u16(ip_id);
     hash.write_le_u64(uts);
     hash.result_u64() as u32
 }
