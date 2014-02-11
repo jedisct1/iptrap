@@ -15,7 +15,7 @@ use iptrap::socketizableip::SocketizableIp;
 use iptrap::{EtherHeader, IpHeader, TcpHeader};
 use iptrap::{PacketDissector, PacketDissectorFilter};
 use iptrap::{Pcap, PcapPacket, DataLinkTypeEthernet};
-use iptrap::{TH_SYN, TH_ACK, TH_PUSH};
+use iptrap::{TH_SYN, TH_ACK};
 use iptrap::{checksum, cookie};
 use std::cast::transmute;
 use std::io::net::ip::IpAddr;
@@ -144,8 +144,7 @@ fn main() {
         let th_flags = unsafe { *dissector.tcphdr_ptr }.th_flags;
         if th_flags == TH_SYN {
             send_tcp_synack(sk, &pcap, dissector, uts);
-        } else if (th_flags & (TH_PUSH | TH_ACK)) == (TH_PUSH | TH_ACK) &&
-            (th_flags & TH_SYN) == 0 {
+        } else if (th_flags & TH_ACK) == TH_ACK && (th_flags & TH_SYN) == 0 {
             log_tcp_ack(&mut zmq_socket, sk, dissector, uts);
         }
     }
