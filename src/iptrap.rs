@@ -118,6 +118,11 @@ fn spawn_time_updater(time_needs_update: &'static mut AtomicBool) {
         });
 }
 
+fn packet_should_be_bypassed(dissector: &PacketDissector) -> bool {
+    let th_dport = unsafe { *dissector.tcphdr_ptr }.th_dport;
+    th_dport == to_be16(22) as u16
+}
+
 #[start]
 fn start(argc: int, argv: **u8) -> int {
     native::start(argc, argv, main)
@@ -167,6 +172,9 @@ fn main() {
                 continue;
             }
         };
+        if packet_should_be_bypassed(&dissector) {
+            continue;
+        }
         if unsafe { time_needs_update.load(Relaxed) } != false {
             unsafe { time_needs_update.store(false, Relaxed) };
             uts = time::precise_time_ns() & 0x1000000000;
