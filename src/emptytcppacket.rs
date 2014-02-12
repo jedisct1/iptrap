@@ -10,7 +10,7 @@ pub struct EmptyTcpPacket {
     etherhdr: EtherHeader,
     iphdr: IpHeader,
     tcphdr: TcpHeader,
-    tcpoptions: ~[u8]
+    tcpoptions: [u8, ..4]
 }
 
 impl EmptyTcpPacket {
@@ -20,7 +20,7 @@ impl EmptyTcpPacket {
             ether_shost: [0u8, ..6],
             ether_type: to_be16(ETHERTYPE_IP as i16) as u16
         };
-        let tcpoptions = ~[ 0x2u8, 0x4u8, 0x5u8, 0xb4u8 ];
+        let tcpoptions = [ 0x2u8, 0x4u8, 0x5u8, 0xb4u8 ];
         let iphdr = IpHeader {
             ip_vhl: (4u8 << 4) | (size_of::<IpHeader>() as u8 / 4u8),
             ip_tos: 0u8,
