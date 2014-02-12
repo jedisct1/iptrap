@@ -10,6 +10,7 @@ use std::vec;
 pub static ETHERTYPE_IP: u16 = 0x0800;
 pub static IPPROTO_TCP: u8 = 6;
 pub static TH_SYN: u8 = 0x02;
+pub static TH_RST: u8 = 0x04;
 pub static TH_ACK: u8 = 0x10;
 pub static TH_PUSH: u8 = 0x08;
 
