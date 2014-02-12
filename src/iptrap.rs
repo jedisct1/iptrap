@@ -41,9 +41,9 @@ fn send_tcp_synack(sk: cookie::SipHashKey, pcap: &Pcap,
 
     sa_packet.tcphdr.th_sport = s_tcphdr.th_dport;
     sa_packet.tcphdr.th_dport = s_tcphdr.th_sport;
+    sa_packet.tcphdr.th_flags = TH_SYN | TH_ACK;
     sa_packet.tcphdr.th_ack = to_be32(
         (from_be32(s_tcphdr.th_seq as i32) as u32 + 1u32) as i32) as u32;
-    sa_packet.tcphdr.th_flags = TH_SYN | TH_ACK;
     sa_packet.tcphdr.th_seq =
         cookie::tcp(sa_packet.iphdr.ip_src, sa_packet.iphdr.ip_dst,
                     sa_packet.tcphdr.th_sport, sa_packet.tcphdr.th_dport,
@@ -70,11 +70,9 @@ fn send_tcp_rst(pcap: &Pcap, dissector: &PacketDissector) {
 
     sa_packet.tcphdr.th_sport = s_tcphdr.th_dport;
     sa_packet.tcphdr.th_dport = s_tcphdr.th_sport;
-    sa_packet.tcphdr.th_ack = to_be32(
-        (from_be32(s_tcphdr.th_seq as i32) as u32 + 1u32) as i32) as u32;
+    sa_packet.tcphdr.th_ack = s_tcphdr.th_seq;
+    sa_packet.tcphdr.th_seq = s_tcphdr.th_ack;
     sa_packet.tcphdr.th_flags = TH_RST | TH_ACK;
-    sa_packet.tcphdr.th_seq = to_be32(
-        (from_be32(s_tcphdr.th_ack as i32) as u32 + 1u32) as i32) as u32;
     checksum::tcp_header(&sa_packet.iphdr, &mut sa_packet.tcphdr);
 
     let sa_packet_v = unsafe { vec::from_buf(transmute(&sa_packet),
