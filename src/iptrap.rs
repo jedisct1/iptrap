@@ -100,8 +100,9 @@ fn log_tcp_ack(zmq_ctx: &mut zmq::Socket, sk: cookie::SipHashKey,
             return;
         }
     }
-    let _ = zmq_ctx.send(dissector.tcp_data, 0);
     info!("Packet received");
+    debug!("[{}]", std::str::from_utf8_lossy(dissector.tcp_data));
+    let _ = zmq_ctx.send(dissector.tcp_data, 0);
 }
 
 fn usage() {
