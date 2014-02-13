@@ -25,6 +25,9 @@ use std::{os, rand, vec};
 
 pub mod zmq;
 
+static STREAM_PORT: u16 = 9922;
+static SSH_PORT: u16 = 22;
+
 fn send_tcp_synack(sk: cookie::SipHashKey, pcap: &Pcap,
                    dissector: &PacketDissector, uts: u64) {
     let ref s_etherhdr: EtherHeader = unsafe { *dissector.etherhdr_ptr };
@@ -120,7 +123,8 @@ fn spawn_time_updater(time_needs_update: &'static mut AtomicBool) {
 
 fn packet_should_be_bypassed(dissector: &PacketDissector) -> bool {
     let th_dport = unsafe { *dissector.tcphdr_ptr }.th_dport;
-    th_dport == to_be16(22) as u16
+    th_dport == to_be16(STREAM_PORT as i16) as u16 ||
+    th_dport == to_be16(SSH_PORT as i16) as u16
 }
 
 #[start]
@@ -156,7 +160,7 @@ fn main() {
     let mut zmq_ctx = zmq::Context::new();
     let mut zmq_socket = zmq_ctx.socket(zmq::PUB).unwrap();
     let _ = zmq_socket.set_linger(1);
-    let _ = zmq_socket.bind("tcp://0.0.0.0:9922");
+    let _ = zmq_socket.bind("tcp://0.0.0.0:" + STREAM_PORT.to_str());
     static mut time_needs_update: AtomicBool = INIT_ATOMIC_BOOL;
     unsafe { spawn_time_updater(&mut time_needs_update) };
     let mut uts = time::precise_time_ns() & 0x1000000000;
