@@ -8,6 +8,8 @@ extern mod extra;
 extern mod native;
 extern mod iptrap;
 
+use extra::json::ToJson;
+use extra::json;
 use extra::time;
 use iptrap::ETHERTYPE_IP;
 use iptrap::EmptyTcpPacket;
@@ -17,6 +19,7 @@ use iptrap::{Pcap, PcapPacket, DataLinkTypeEthernet};
 use iptrap::{TH_SYN, TH_ACK, TH_RST};
 use iptrap::{checksum, cookie};
 use std::cast::transmute;
+use std::hashmap::HashMap;
 use std::io::net::ip::{IpAddr, Ipv4Addr};
 use std::mem::size_of_val;
 use std::mem::{to_be16, to_be32, from_be32};
@@ -104,8 +107,14 @@ fn log_tcp_ack(zmq_ctx: &mut zmq::Socket, sk: cookie::SipHashKey,
         }
     }
     info!("Packet received");
-    debug!("[{}]", std::str::from_utf8_lossy(dissector.tcp_data));
-    let _ = zmq_ctx.send(dissector.tcp_data, 0);
+    let tcp_data_str =
+        std::str::from_utf8_lossy(dissector.tcp_data).into_owned();
+    debug!("[{}]", tcp_data_str);
+    let mut record: HashMap<~str, json::Json> = HashMap::with_capacity(3);
+    record.insert(~"uts", json::Number((uts / 1000000000) as f64));
+    record.insert(~"dport", json::Number(s_tcphdr.th_sport as f64));
+    record.insert(~"payload", json::String(tcp_data_str));
+    let _ = zmq_ctx.send(record.to_json().to_str().as_bytes(), 0);
 }
 
 fn usage() {
