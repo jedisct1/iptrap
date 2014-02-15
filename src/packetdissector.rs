@@ -4,7 +4,6 @@ extern mod std;
 use std::cast::transmute;
 use std::mem::size_of;
 use std::mem::{to_be16, from_be16};
-use std::ptr;
 use std::vec;
 
 pub static ETHERTYPE_IP: u16 = 0x0800;
@@ -81,7 +80,7 @@ impl PacketDissector {
             return Err(~"Short IP packet")
         }
         let iphdr_ptr: *IpHeader = unsafe {
-            transmute(ptr::offset(ll_data.as_ptr(), iphdr_offset as int))
+            transmute(ll_data.as_ptr().offset(iphdr_offset as int))
         };
         let ref iphdr: IpHeader = unsafe { *iphdr_ptr };
         let iphdr_len = (iphdr.ip_vhl & 0xf) as uint * 4u;
@@ -104,7 +103,7 @@ impl PacketDissector {
             return Err(~"Short TCP packet");
         }
         let tcphdr_ptr: *TcpHeader = unsafe {
-            transmute(ptr::offset(ll_data.as_ptr(), tcphdr_offset as int))
+            transmute(ll_data.as_ptr().offset(tcphdr_offset as int))
         };
         let ref tcphdr: TcpHeader = unsafe { *tcphdr_ptr };        
         let tcphdr_data_offset = ((tcphdr.th_off_x2 >> 4) & 0xf) as uint * 4u;
@@ -124,7 +123,7 @@ impl PacketDissector {
         let max_tcp_data_len = ll_data_len - tcp_data_offset;
         let tcp_data_len = std::cmp::min(real_tcp_data_len, max_tcp_data_len);
         let tcp_data_ptr = unsafe {
-            ptr::offset(ll_data.as_ptr(), tcp_data_offset as int)
+            ll_data.as_ptr().offset(tcp_data_offset as int)
         };
         let tcp_data = unsafe { vec::from_buf(tcp_data_ptr, tcp_data_len) };
 
