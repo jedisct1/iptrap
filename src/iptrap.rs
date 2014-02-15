@@ -172,7 +172,7 @@ fn main() {
     let _ = zmq_socket.bind("tcp://0.0.0.0:" + STREAM_PORT.to_str());
     static mut time_needs_update: AtomicBool = INIT_ATOMIC_BOOL;
     unsafe { spawn_time_updater(&mut time_needs_update) };
-    let mut uts = time::precise_time_ns() & 0x1000000000;
+    let mut uts = time::precise_time_ns() & !0xfffffffff;
 
     let mut pkt_opt: Option<PcapPacket>;
     while { pkt_opt = pcap.next_packet();
@@ -190,7 +190,7 @@ fn main() {
         }
         if unsafe { time_needs_update.load(Relaxed) } != false {
             unsafe { time_needs_update.store(false, Relaxed) };
-            uts = time::precise_time_ns() & 0x1000000000;
+            uts = time::precise_time_ns() & !0xfffffffff;
         }
         let th_flags = unsafe { *dissector.tcphdr_ptr }.th_flags;
         if th_flags == TH_SYN {
