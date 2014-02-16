@@ -110,8 +110,12 @@ fn log_tcp_ack(zmq_ctx: &mut zmq::Socket, sk: cookie::SipHashKey,
     let tcp_data_str =
         std::str::from_utf8_lossy(dissector.tcp_data).into_owned();
     debug!("[{}]", tcp_data_str);
+    let ip_src = s_iphdr.ip_src;
     let mut record: HashMap<~str, json::Json> = HashMap::with_capacity(3);
     record.insert(~"uts", json::Number((uts / 1000000000) as f64));
+    record.insert(~"ip_src", json::String(format!("{}.{}.{}.{}",
+                                                  ip_src[0], ip_src[1],
+                                                  ip_src[2], ip_src[3])));
     record.insert(~"dport", json::Number(s_tcphdr.th_sport as f64));
     record.insert(~"payload", json::String(tcp_data_str));
     let _ = zmq_ctx.send(record.to_json().to_str().as_bytes(), 0);
