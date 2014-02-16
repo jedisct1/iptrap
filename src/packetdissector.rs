@@ -1,5 +1,5 @@
 
-extern mod std;
+extern crate std;
 
 use std::cast::transmute;
 use std::mem::size_of;

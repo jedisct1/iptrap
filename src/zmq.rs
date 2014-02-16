@@ -2,7 +2,7 @@
 
 #[allow(non_camel_case_types)];
 
-extern mod extra;
+extern crate extra;
 
 use std::{cast, libc, mem, ptr, str, vec};
 use std::libc::{c_int, c_long, c_void, size_t, c_char};

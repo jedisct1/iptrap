@@ -4,9 +4,9 @@
        unnecessary_qualification,
        managed_heap_memory)];
 
-extern mod extra;
-extern mod native;
-extern mod iptrap;
+extern crate extra;
+extern crate native;
+extern crate iptrap;
 
 use extra::json::ToJson;
 use extra::json;
