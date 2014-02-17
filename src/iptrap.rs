@@ -33,7 +33,7 @@ static STREAM_PORT: u16 = 9922;
 static SSH_PORT: u16 = 22;
 
 fn send_tcp_synack(sk: cookie::SipHashKey, chan: &Chan<~[u8]>,
-                   dissector: &PacketDissector, uts: u64) {
+                   dissector: &PacketDissector, ts: u64) {
     let ref s_etherhdr: EtherHeader = unsafe { *dissector.etherhdr_ptr };
     assert!(s_etherhdr.ether_type == to_be16(ETHERTYPE_IP as i16) as u16);
     let ref s_iphdr: IpHeader = unsafe { *dissector.iphdr_ptr };
@@ -54,7 +54,7 @@ fn send_tcp_synack(sk: cookie::SipHashKey, chan: &Chan<~[u8]>,
     sa_packet.tcphdr.th_seq =
         cookie::tcp(sa_packet.iphdr.ip_src, sa_packet.iphdr.ip_dst,
                     sa_packet.tcphdr.th_sport, sa_packet.tcphdr.th_dport,
-                    sk, uts);
+                    sk, ts);
     checksum::tcp_header(&sa_packet.iphdr, &mut sa_packet.tcphdr);
 
     let sa_packet_v = unsafe { vec::from_buf(transmute(&sa_packet),
@@ -88,19 +88,19 @@ fn send_tcp_rst(chan: &Chan<~[u8]>, dissector: &PacketDissector) {
 }
 
 fn log_tcp_ack(zmq_ctx: &mut zmq::Socket, sk: cookie::SipHashKey,
-               dissector: &PacketDissector, uts: u64) {
+               dissector: &PacketDissector, ts: u64) {
     let ref s_iphdr: IpHeader = unsafe { *dissector.iphdr_ptr };
     let ref s_tcphdr: TcpHeader = unsafe { *dissector.tcphdr_ptr };
     let ack_cookie = cookie::tcp(s_iphdr.ip_dst, s_iphdr.ip_src,
                                  s_tcphdr.th_dport, s_tcphdr.th_sport,
-                                 sk, uts);
+                                 sk, ts);
     let wanted_cookie = to_be32((from_be32(ack_cookie as i32) as u32
                                  + 1u32) as i32) as u32;
     if s_tcphdr.th_ack != wanted_cookie {
-        let uts_alt = uts - 0x1000000000;
+        let ts_alt = ts - 0x40;
         let ack_cookie_alt = cookie::tcp(s_iphdr.ip_dst, s_iphdr.ip_src,
                                          s_tcphdr.th_dport, s_tcphdr.th_sport,
-                                         sk, uts_alt);
+                                         sk, ts_alt);
         let wanted_cookie_alt = to_be32((from_be32(ack_cookie_alt as i32) as u32
                                          + 1u32) as i32) as u32;
         if s_tcphdr.th_ack != wanted_cookie_alt {
@@ -112,7 +112,7 @@ fn log_tcp_ack(zmq_ctx: &mut zmq::Socket, sk: cookie::SipHashKey,
     let ip_src = s_iphdr.ip_src;
     let dport = from_be16(s_tcphdr.th_dport as i16) as u16;
     let mut record: HashMap<~str, json::Json> = HashMap::with_capacity(3);
-    record.insert(~"uts", json::Number((uts / 1000000000) as f64));
+    record.insert(~"ts", json::Number(ts as f64));
     record.insert(~"ip_src", json::String(format!("{}.{}.{}.{}",
                                                   ip_src[0], ip_src[1],
                                                   ip_src[2], ip_src[3])));
@@ -189,7 +189,7 @@ fn main() {
     let _ = zmq_socket.bind("tcp://0.0.0.0:" + STREAM_PORT.to_str());
     static mut time_needs_update: AtomicBool = INIT_ATOMIC_BOOL;
     unsafe { spawn_time_updater(&mut time_needs_update) };
-    let mut uts = time::precise_time_ns() & !0xfffffffff;
+    let mut ts = time::get_time().sec as u64 & !0x3f;
 
     let mut pkt_opt: Option<PcapPacket>;
     while { pkt_opt = pcap1.next_packet();
@@ -206,13 +206,13 @@ fn main() {
         }
         if unsafe { time_needs_update.load(Relaxed) } != false {
             unsafe { time_needs_update.store(false, Relaxed) };
-            uts = time::precise_time_ns() & !0xfffffffff;
+            ts = time::get_time().sec as u64 & !0x3f;
         }
         let th_flags = unsafe { *dissector.tcphdr_ptr }.th_flags;
         if th_flags == TH_SYN {
-            send_tcp_synack(sk, &packetwriter_chan, &dissector, uts);
+            send_tcp_synack(sk, &packetwriter_chan, &dissector, ts);
         } else if (th_flags & TH_ACK) == TH_ACK && (th_flags & TH_SYN) == 0 {
-            log_tcp_ack(&mut zmq_socket, sk, &dissector, uts);
+            log_tcp_ack(&mut zmq_socket, sk, &dissector, ts);
             send_tcp_rst(&packetwriter_chan, &dissector);
         }
     }
