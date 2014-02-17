@@ -1,10 +1,8 @@
 //! Module: zmq
 
-#[allow(non_camel_case_types)];
-
 extern crate extra;
 
-use std::{cast, libc, mem, ptr, str, vec};
+use std::{libc, mem, ptr, str, vec};
 use std::libc::{c_int, c_long, c_void, size_t, c_char};
 
 /// The ZMQ container that manages all the sockets
@@ -48,6 +46,7 @@ extern {
 }
 
 /// Socket types
+#[allow(non_camel_case_types)]
 #[deriving(Clone)]
 pub enum SocketType {
     PAIR   = 0,
@@ -66,6 +65,7 @@ pub enum SocketType {
 pub static DONTWAIT : int = 1;
 pub static SNDMORE : int = 2;
 
+#[allow(non_camel_case_types)]
 #[deriving(Clone)]
 pub enum Constants {
     ZMQ_AFFINITY          = 4,
@@ -336,7 +336,7 @@ impl Socket {
             // Copy the data into the message.
             zmq_msg_init_size(&msg, len as size_t);
 
-            ptr::copy_memory(cast::transmute(zmq_msg_data(&msg)), base_ptr, len);
+            ptr::copy_memory(zmq_msg_data(&msg) as *mut u8, base_ptr, len);
 
             let rc = zmq_msg_send(&msg, self.sock, flags as c_int);
 
