@@ -89,6 +89,9 @@ fn send_tcp_rst(chan: &Chan<~[u8]>, dissector: &PacketDissector) {
 
 fn log_tcp_ack(zmq_ctx: &mut zmq::Socket, sk: cookie::SipHashKey,
                dissector: &PacketDissector, ts: u64) -> bool {
+    if dissector.tcp_data.len() <= 0 {
+        return false;
+    }
     let ref s_iphdr: IpHeader = unsafe { *dissector.iphdr_ptr };
     let ref s_tcphdr: TcpHeader = unsafe { *dissector.tcphdr_ptr };
     let ack_cookie = cookie::tcp(s_iphdr.ip_dst, s_iphdr.ip_src,
