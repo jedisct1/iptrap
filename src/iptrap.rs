@@ -114,7 +114,7 @@ fn log_tcp_ack(zmq_ctx: &mut zmq::Socket, sk: cookie::SipHashKey,
         std::str::from_utf8_lossy(dissector.tcp_data).into_owned();
     let ip_src = s_iphdr.ip_src;
     let dport = from_be16(s_tcphdr.th_dport as i16) as u16;
-    let mut record: HashMap<~str, json::Json> = HashMap::with_capacity(3);
+    let mut record: HashMap<~str, json::Json> = HashMap::with_capacity(4);
     record.insert(~"ts", json::Number(ts as f64));
     record.insert(~"ip_src", json::String(format!("{}.{}.{}.{}",
                                                   ip_src[0], ip_src[1],
