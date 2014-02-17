@@ -5,8 +5,9 @@
        managed_heap_memory)];
 
 extern crate extra;
-extern crate native;
 extern crate iptrap;
+extern crate native;
+extern crate sync;
 
 use extra::json::ToJson;
 use extra::json;
@@ -22,7 +23,7 @@ use std::cast::transmute;
 use std::hashmap::HashMap;
 use std::io::net::ip::{IpAddr, Ipv4Addr};
 use std::mem::size_of_val;
-use std::mem::{to_be16, to_be32, from_be32};
+use std::mem::{to_be16, to_be32, from_be16, from_be32};
 use std::sync::atomics::{AtomicBool, Relaxed, INIT_ATOMIC_BOOL};
 use std::{os, rand, vec};
 
@@ -31,7 +32,7 @@ pub mod zmq;
 static STREAM_PORT: u16 = 9922;
 static SSH_PORT: u16 = 22;
 
-fn send_tcp_synack(sk: cookie::SipHashKey, pcap: &Pcap,
+fn send_tcp_synack(sk: cookie::SipHashKey, chan: &Chan<~[u8]>,
                    dissector: &PacketDissector, uts: u64) {
     let ref s_etherhdr: EtherHeader = unsafe { *dissector.etherhdr_ptr };
     assert!(s_etherhdr.ether_type == to_be16(ETHERTYPE_IP as i16) as u16);
@@ -58,10 +59,10 @@ fn send_tcp_synack(sk: cookie::SipHashKey, pcap: &Pcap,
 
     let sa_packet_v = unsafe { vec::from_buf(transmute(&sa_packet),
                                              size_of_val(&sa_packet)) };
-    pcap.send_packet(sa_packet_v);
+    chan.send(sa_packet_v);
 }
 
-fn send_tcp_rst(pcap: &Pcap, dissector: &PacketDissector) {
+fn send_tcp_rst(chan: &Chan<~[u8]>, dissector: &PacketDissector) {
     let ref s_etherhdr: EtherHeader = unsafe { *dissector.etherhdr_ptr };
     assert!(s_etherhdr.ether_type == to_be16(ETHERTYPE_IP as i16) as u16);
     let ref s_iphdr: IpHeader = unsafe { *dissector.iphdr_ptr };
@@ -83,7 +84,7 @@ fn send_tcp_rst(pcap: &Pcap, dissector: &PacketDissector) {
 
     let sa_packet_v = unsafe { vec::from_buf(transmute(&sa_packet),
                                              size_of_val(&sa_packet)) };
-    pcap.send_packet(sa_packet_v);
+    chan.send(sa_packet_v);
 }
 
 fn log_tcp_ack(zmq_ctx: &mut zmq::Socket, sk: cookie::SipHashKey,
@@ -106,19 +107,20 @@ fn log_tcp_ack(zmq_ctx: &mut zmq::Socket, sk: cookie::SipHashKey,
             return;
         }
     }
-    info!("Packet received");
     let tcp_data_str =
         std::str::from_utf8_lossy(dissector.tcp_data).into_owned();
-    debug!("[{}]", tcp_data_str);
     let ip_src = s_iphdr.ip_src;
+    let dport = from_be16(s_tcphdr.th_dport as i16) as u16;
     let mut record: HashMap<~str, json::Json> = HashMap::with_capacity(3);
     record.insert(~"uts", json::Number((uts / 1000000000) as f64));
     record.insert(~"ip_src", json::String(format!("{}.{}.{}.{}",
                                                   ip_src[0], ip_src[1],
                                                   ip_src[2], ip_src[3])));
-    record.insert(~"dport", json::Number(s_tcphdr.th_sport as f64));
+    record.insert(~"dport", json::Number(dport as f64));
     record.insert(~"payload", json::String(tcp_data_str));
-    let _ = zmq_ctx.send(record.to_json().to_str().as_bytes(), 0);
+    let json = record.to_json().to_str();
+    let _ = zmq_ctx.send(json.as_bytes(), 0);
+    info!("{}", json);
 }
 
 fn usage() {
@@ -170,6 +172,17 @@ fn main() {
     let filter = PacketDissectorFilter {
         local_ip: local_ip
     };
+    let pcap_arc = sync::Arc::new(pcap);
+    let (packetwriter_port, packetwriter_chan):
+        (Port<~[u8]>, Chan<~[u8]>) = Chan::new();
+    let pcap_arc0 = pcap_arc.clone();
+    spawn(proc() {
+            let pcap0 = pcap_arc0.get();
+            loop {
+                pcap0.send_packet(packetwriter_port.recv());
+            }
+        });
+    let pcap1 = pcap_arc.get();
     let mut zmq_ctx = zmq::Context::new();
     let mut zmq_socket = zmq_ctx.socket(zmq::PUB).unwrap();
     let _ = zmq_socket.set_linger(1);
@@ -179,13 +192,12 @@ fn main() {
     let mut uts = time::precise_time_ns() & !0xfffffffff;
 
     let mut pkt_opt: Option<PcapPacket>;
-    while { pkt_opt = pcap.next_packet();
+    while { pkt_opt = pcap1.next_packet();
             pkt_opt.is_some() } {
         let pkt = pkt_opt.unwrap();
         let dissector = match PacketDissector::new(&filter, pkt.ll_data) {
             Ok(dissector) => dissector,
-            Err(err) => {
-                debug!("dissector: {}", err);
+            Err(_) => {
                 continue;
             }
         };
@@ -198,10 +210,10 @@ fn main() {
         }
         let th_flags = unsafe { *dissector.tcphdr_ptr }.th_flags;
         if th_flags == TH_SYN {
-            send_tcp_synack(sk, &pcap, &dissector, uts);
+            send_tcp_synack(sk, &packetwriter_chan, &dissector, uts);
         } else if (th_flags & TH_ACK) == TH_ACK && (th_flags & TH_SYN) == 0 {
             log_tcp_ack(&mut zmq_socket, sk, &dissector, uts);
-            send_tcp_rst(&pcap, &dissector);
+            send_tcp_rst(&packetwriter_chan, &dissector);
         }
     }
 }
