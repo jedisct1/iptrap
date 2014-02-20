@@ -10,9 +10,12 @@
 pub use emptytcppacket::*;
 pub use packetdissector::*;
 pub use pcap::*;
+pub use privilegesdrop::*;
 
 pub mod checksum;
 pub mod cookie;
 pub mod emptytcppacket;
 pub mod packetdissector;
 pub mod pcap;
+pub mod privilegesdrop;
+

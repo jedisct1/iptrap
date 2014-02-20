@@ -12,6 +12,7 @@ extern crate sync;
 use extra::json::ToJson;
 use extra::json;
 use extra::time;
+use iptrap::privilegesdrop;
 use iptrap::ETHERTYPE_IP;
 use iptrap::EmptyTcpPacket;
 use iptrap::{EtherHeader, IpHeader, TcpHeader};
@@ -128,7 +129,7 @@ fn log_tcp_ack(zmq_ctx: &mut zmq::Socket, sk: cookie::SipHashKey,
 }
 
 fn usage() {
-    println!("Usage: iptrap <device> <local ip address>");
+    println!("Usage: iptrap <device> <local ip address> <uid> <gid>");
 }
 
 fn spawn_time_updater(time_needs_update: &'static mut AtomicBool) {
@@ -153,7 +154,7 @@ fn start(argc: int, argv: **u8) -> int {
 
 fn main() {
     let args = os::args();
-    if args.len() != 3 {
+    if args.len() != 5 {
         return usage();
     }
     let local_addr = match from_str::<IpAddr>(args[2]) {
@@ -164,7 +165,8 @@ fn main() {
         Ipv4Addr(a, b, c, d) => ~[a, b, c, d],
         _ => fail!("Only IPv4 is supported for now")
     };
-    let pcap = Pcap::open_live(args[1]).unwrap();
+    let pcap = Pcap::open_live(args[1].to_owned()).unwrap();
+    privilegesdrop::switch_user(from_str(args[3]), from_str(args[4]));
     match pcap.data_link_type() {
         DataLinkTypeEthernet => (),
         _ => fail!("Unsupported data link type")
