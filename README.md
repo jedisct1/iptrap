@@ -1,4 +1,5 @@
 IPtrap 2
 ========
 
-A simple, but damn fast sinkhole
+A sinkhole that never clogs.
+
