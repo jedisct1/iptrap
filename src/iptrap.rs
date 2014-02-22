@@ -8,10 +8,10 @@ extern crate extra;
 extern crate iptrap;
 extern crate native;
 extern crate sync;
+extern crate time;
 
 use extra::json::ToJson;
 use extra::json;
-use extra::time;
 use iptrap::privilegesdrop;
 use iptrap::ETHERTYPE_IP;
 use iptrap::EmptyTcpPacket;
