@@ -1,5 +1,5 @@
 
-use std::hash::{SipState, Streaming};
+use std::hash::sip::SipState;
 
 pub struct SipHashKey {
     k1: u64,
@@ -15,5 +15,5 @@ pub fn tcp(ip_src: &[u8], ip_dst: &[u8], th_sport: u16, th_dport: u16,
     hash.write_le_u16(th_sport);
     hash.write_le_u16(th_dport);
     hash.write_le_u64(uts);
-    hash.result_u64() as u32
+    hash.result() as u32
 }
