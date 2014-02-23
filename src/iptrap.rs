@@ -4,12 +4,14 @@
        unnecessary_qualification,
        managed_heap_memory)];
 
+extern crate collections;
 extern crate extra;
 extern crate iptrap;
 extern crate native;
 extern crate sync;
 extern crate time;
 
+use collections::HashMap;
 use extra::json::ToJson;
 use extra::json;
 use iptrap::privilegesdrop;
@@ -21,7 +23,6 @@ use iptrap::{Pcap, PcapPacket, DataLinkTypeEthernet};
 use iptrap::{TH_SYN, TH_ACK, TH_RST};
 use iptrap::{checksum, cookie};
 use std::cast::transmute;
-use std::hashmap::HashMap;
 use std::io::net::ip::{IpAddr, Ipv4Addr};
 use std::mem::size_of_val;
 use std::mem::{to_be16, to_be32, from_be16, from_be32};
