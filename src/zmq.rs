@@ -1,7 +1,5 @@
 //! Module: zmq
 
-extern crate extra;
-
 use std::{libc, mem, ptr, str, vec};
 use std::libc::{c_int, c_long, c_void, size_t, c_char};
 use std::fmt;

@@ -5,7 +5,6 @@
        managed_heap_memory)];
 
 extern crate collections;
-extern crate extra;
 extern crate iptrap;
 extern crate native;
 extern crate serialize;
