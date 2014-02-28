@@ -1,4 +1,6 @@
 
+#[allow(visible_private_types)];
+
 use std::libc::types::os::common::posix01::timeval;
 use std::libc::{c_void, c_char, c_int};
 use std::ptr;
