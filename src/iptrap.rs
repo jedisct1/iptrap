@@ -12,9 +12,10 @@ extern crate sync;
 extern crate time;
 
 use collections::HashMap;
-use iptrap::privilegesdrop;
 use iptrap::ETHERTYPE_IP;
 use iptrap::EmptyTcpPacket;
+use iptrap::privilegesdrop;
+use iptrap::strsliceescape::StrSliceEscape;
 use iptrap::{EtherHeader, IpHeader, TcpHeader};
 use iptrap::{PacketDissector, PacketDissectorFilter};
 use iptrap::{Pcap, PcapPacket, DataLinkTypeEthernet};
@@ -122,7 +123,7 @@ fn log_tcp_ack(zmq_ctx: &mut zmq::Socket, sk: cookie::SipHashKey,
                                                   ip_src[0], ip_src[1],
                                                   ip_src[2], ip_src[3])));
     record.insert(~"dport", json::Number(dport as f64));
-    record.insert(~"payload", json::String(tcp_data_str));
+    record.insert(~"payload", json::String(tcp_data_str.escape_default_except_lf()));
     let json = record.to_json().to_str();
     let _ = zmq_ctx.send(json.as_bytes(), 0);
     info!("{}", json);
