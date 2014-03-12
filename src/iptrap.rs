@@ -7,6 +7,7 @@
 extern crate collections;
 extern crate iptrap;
 extern crate native;
+extern crate rand;
 extern crate serialize;
 extern crate sync;
 extern crate time;
@@ -28,7 +29,7 @@ use std::io::net::ip::{IpAddr, Ipv4Addr};
 use std::mem::size_of_val;
 use std::mem::{to_be16, to_be32, from_be16, from_be32};
 use std::sync::atomics::{AtomicBool, Relaxed, INIT_ATOMIC_BOOL};
-use std::{os, rand, vec};
+use std::{os, vec};
 
 pub mod zmq;
 
