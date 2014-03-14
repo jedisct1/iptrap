@@ -36,7 +36,7 @@ pub mod zmq;
 static STREAM_PORT: u16 = 9922;
 static SSH_PORT: u16 = 22;
 
-fn send_tcp_synack(sk: cookie::SipHashKey, chan: &Chan<~[u8]>,
+fn send_tcp_synack(sk: cookie::SipHashKey, chan: &Sender<~[u8]>,
                    dissector: &PacketDissector, ts: u64) {
     let ref s_etherhdr: EtherHeader = unsafe { *dissector.etherhdr_ptr };
     assert!(s_etherhdr.ether_type == to_be16(ETHERTYPE_IP as i16) as u16);
@@ -66,7 +66,7 @@ fn send_tcp_synack(sk: cookie::SipHashKey, chan: &Chan<~[u8]>,
     chan.send(sa_packet_v);
 }
 
-fn send_tcp_rst(chan: &Chan<~[u8]>, dissector: &PacketDissector) {
+fn send_tcp_rst(chan: &Sender<~[u8]>, dissector: &PacketDissector) {
     let ref s_etherhdr: EtherHeader = unsafe { *dissector.etherhdr_ptr };
     assert!(s_etherhdr.ether_type == to_be16(ETHERTYPE_IP as i16) as u16);
     let ref s_iphdr: IpHeader = unsafe { *dissector.iphdr_ptr };
@@ -182,8 +182,8 @@ fn main() {
         local_ip: local_ip
     };
     let pcap_arc = sync::Arc::new(pcap);
-    let (packetwriter_port, packetwriter_chan):
-        (Port<~[u8]>, Chan<~[u8]>) = Chan::new();
+    let (packetwriter_chan, packetwriter_port):
+        (Sender<~[u8]>, Receiver<~[u8]>) = channel();
     let pcap_arc0 = pcap_arc.clone();
     spawn(proc() {
             let pcap0 = pcap_arc0.get();
