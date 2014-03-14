@@ -3,6 +3,7 @@
        non_uppercase_statics,
        unnecessary_qualification,
        managed_heap_memory)];
+#[allow(deprecated_owned_vector)];
 
 extern crate collections;
 extern crate iptrap;

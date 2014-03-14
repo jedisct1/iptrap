@@ -1,4 +1,6 @@
 
+#[allow(deprecated_owned_vector)];
+
 use packetdissector::{IpHeader, TcpHeader};
 use std::cast::transmute;
 use std::iter;

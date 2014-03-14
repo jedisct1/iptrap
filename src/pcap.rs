@@ -1,5 +1,6 @@
 
 #[allow(visible_private_types)];
+#[allow(deprecated_owned_vector)];
 
 use std::libc::types::os::common::posix01::timeval;
 use std::libc::{c_void, c_char, c_int};

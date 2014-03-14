@@ -1,4 +1,6 @@
 
+#[allow(deprecated_owned_vector)];
+
 extern crate std;
 
 use std::cast::transmute;
