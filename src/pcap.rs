@@ -6,7 +6,7 @@ use std::libc::types::os::common::posix01::timeval;
 use std::libc::{c_void, c_char, c_int};
 use std::ptr;
 use std::str::raw::from_c_str;
-use std::vec;
+use std::slice;
 
 pub static PCAP_ERRBUF_SIZE: uint = 256;
 
@@ -49,7 +49,7 @@ extern {
 
 impl Pcap {
     pub fn open_live(device: ~str) -> Result<Pcap, ~str> {
-        let mut errbuf: ~[c_char] = vec::with_capacity(PCAP_ERRBUF_SIZE);
+        let mut errbuf: ~[c_char] = slice::with_capacity(PCAP_ERRBUF_SIZE);
         let device = unsafe { device.to_c_str().unwrap() };
         let pcap = unsafe { pcap_open_live(device, 65536, 1,
                                            500, errbuf.as_mut_ptr()) };
@@ -80,7 +80,7 @@ impl Pcap {
                 let packet_header = unsafe { *packet_header_pnt };
                 let ll_data_len = packet_header.caplen as uint;
                 let ll_data = unsafe {
-                    vec::from_buf(ll_data_pnt, ll_data_len)
+                    slice::from_buf(ll_data_pnt, ll_data_len)
                 };
                 Some(PcapPacket {
                         ll_data: ll_data

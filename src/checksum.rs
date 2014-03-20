@@ -6,12 +6,12 @@ use std::cast::transmute;
 use std::iter;
 use std::mem::size_of_val;
 use std::mem::to_be16;
-use std::vec;
+use std::slice;
 
 pub fn ip_header(iphdr: &mut IpHeader) {
     let iphdr_len = size_of_val(iphdr);
     let iphdr_ptr: *u8 = unsafe { transmute(iphdr) };
-    let iphdr_v = unsafe { vec::from_buf(iphdr_ptr, iphdr_len) };
+    let iphdr_v = unsafe { slice::from_buf(iphdr_ptr, iphdr_len) };
     let mut sum: u64 = iter::range_step(0, iphdr_len as u64, 2).
         fold(0u64, |sum, i|
              sum + ((iphdr_v[i] as u16 << 8) | iphdr_v[i + 1] as u16) as u64);
@@ -33,7 +33,7 @@ pub fn tcp_header(iphdr: &IpHeader, tcphdr: &mut TcpHeader) {
     sum0 += (iphdr.ip_dst[0] as u16 << 8 | iphdr.ip_dst[1] as u16) as u64;
     sum0 += (iphdr.ip_dst[2] as u16 << 8 | iphdr.ip_dst[3] as u16) as u64;
     let tcphdr_ptr: *u8 = unsafe { transmute(tcphdr) };
-    let tcphdr_v = unsafe { vec::from_buf(tcphdr_ptr, tcphdr_len) };
+    let tcphdr_v = unsafe { slice::from_buf(tcphdr_ptr, tcphdr_len) };
     let mut sum: u64 = iter::range_step(0, tcphdr_len as u64, 2).
         fold(sum0, |sum, i|
              sum + ((tcphdr_v[i] as u16 << 8) | tcphdr_v[i + 1] as u16) as u64);

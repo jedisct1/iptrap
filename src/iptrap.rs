@@ -33,7 +33,7 @@ use std::io::net::ip::{IpAddr, Ipv4Addr};
 use std::mem::size_of_val;
 use std::mem::{to_be16, to_be32, from_be16, from_be32};
 use std::sync::atomics::{AtomicBool, Relaxed, INIT_ATOMIC_BOOL};
-use std::{os, vec};
+use std::{os, slice};
 
 pub mod zmq;
 
@@ -65,8 +65,8 @@ fn send_tcp_synack(sk: cookie::SipHashKey, chan: &Sender<~[u8]>,
                     sk, ts);
     checksum::tcp_header(&sa_packet.iphdr, &mut sa_packet.tcphdr);
 
-    let sa_packet_v = unsafe { vec::from_buf(transmute(&sa_packet),
-                                             size_of_val(&sa_packet)) };
+    let sa_packet_v = unsafe { slice::from_buf(transmute(&sa_packet),
+                                               size_of_val(&sa_packet)) };
     chan.send(sa_packet_v);
 }
 
@@ -90,8 +90,8 @@ fn send_tcp_rst(chan: &Sender<~[u8]>, dissector: &PacketDissector) {
     rst_packet.tcphdr.th_flags = TH_RST | TH_ACK;
     checksum::tcp_header(&rst_packet.iphdr, &mut rst_packet.tcphdr);
 
-    let rst_packet_v = unsafe { vec::from_buf(transmute(&rst_packet),
-                                              size_of_val(&rst_packet)) };
+    let rst_packet_v = unsafe { slice::from_buf(transmute(&rst_packet),
+                                                size_of_val(&rst_packet)) };
     chan.send(rst_packet_v);
 }
 

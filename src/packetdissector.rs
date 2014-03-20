@@ -6,7 +6,7 @@ extern crate std;
 use std::cast::transmute;
 use std::mem::size_of;
 use std::mem::{to_be16, from_be16};
-use std::vec;
+use std::slice;
 
 pub static ETHERTYPE_IP: u16 = 0x0800;
 pub static IPPROTO_TCP: u8 = 6;
@@ -127,7 +127,7 @@ impl PacketDissector {
         let tcp_data_ptr = unsafe {
             ll_data.as_ptr().offset(tcp_data_offset as int)
         };
-        let tcp_data = unsafe { vec::from_buf(tcp_data_ptr, tcp_data_len) };
+        let tcp_data = unsafe { slice::from_buf(tcp_data_ptr, tcp_data_len) };
 
         Ok(PacketDissector {
                 ll_data: ll_data,
