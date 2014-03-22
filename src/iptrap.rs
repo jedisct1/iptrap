@@ -10,7 +10,6 @@
 
 extern crate collections;
 extern crate iptrap;
-extern crate native;
 extern crate rand;
 extern crate serialize;
 extern crate sync;
@@ -155,11 +154,6 @@ fn packet_should_be_bypassed(dissector: &PacketDissector) -> bool {
     let th_dport = unsafe { *dissector.tcphdr_ptr }.th_dport;
     th_dport == to_be16(STREAM_PORT as i16) as u16 ||
     th_dport == to_be16(SSH_PORT as i16) as u16
-}
-
-#[start]
-fn start(argc: int, argv: **u8) -> int {
-    native::start(argc, argv, main)
 }
 
 fn main() {
