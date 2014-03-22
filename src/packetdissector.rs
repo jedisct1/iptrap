@@ -3,7 +3,6 @@
 
 extern crate std;
 
-use std::cast::transmute;
 use std::mem::size_of;
 use std::mem::{to_be16, from_be16};
 use std::slice;
@@ -68,9 +67,7 @@ impl PacketDissector {
         if ll_data_len < size_of::<EtherHeader>() {
             return Err(~"Short ethernet frame");
         }
-        let etherhdr_ptr: *EtherHeader = unsafe {
-            transmute(ll_data.as_ptr())
-        };
+        let etherhdr_ptr: *EtherHeader = ll_data.as_ptr() as *EtherHeader;
         let ref etherhdr = unsafe { *etherhdr_ptr };
         
         if etherhdr.ether_type != to_be16(ETHERTYPE_IP as i16) as u16 {
@@ -82,7 +79,7 @@ impl PacketDissector {
             return Err(~"Short IP packet")
         }
         let iphdr_ptr: *IpHeader = unsafe {
-            transmute(ll_data.as_ptr().offset(iphdr_offset as int))
+            ll_data.as_ptr().offset(iphdr_offset as int) as *IpHeader
         };
         let ref iphdr: IpHeader = unsafe { *iphdr_ptr };
         let iphdr_len = (iphdr.ip_vhl & 0xf) as uint * 4u;
@@ -105,7 +102,7 @@ impl PacketDissector {
             return Err(~"Short TCP packet");
         }
         let tcphdr_ptr: *TcpHeader = unsafe {
-            transmute(ll_data.as_ptr().offset(tcphdr_offset as int))
+            ll_data.as_ptr().offset(tcphdr_offset as int) as *TcpHeader
         };
         let ref tcphdr: TcpHeader = unsafe { *tcphdr_ptr };        
         let tcphdr_data_offset = ((tcphdr.th_off_x2 >> 4) & 0xf) as uint * 4u;
