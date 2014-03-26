@@ -187,12 +187,10 @@ fn main() {
         (Sender<~[u8]>, Receiver<~[u8]>) = channel();
     let pcap_arc0 = pcap_arc.clone();
     spawn(proc() {
-            let pcap0 = pcap_arc0.get();
             loop {
-                pcap0.send_packet(packetwriter_port.recv());
+                pcap_arc0.send_packet(packetwriter_port.recv());
             }
         });
-    let pcap1 = pcap_arc.get();
     let mut zmq_ctx = zmq::Context::new();
     let mut zmq_socket = zmq_ctx.socket(zmq::PUB).unwrap();
     let _ = zmq_socket.set_linger(1);
@@ -202,7 +200,7 @@ fn main() {
     let mut ts = time::get_time().sec as u64 & !0x3f;
 
     let mut pkt_opt: Option<PcapPacket>;
-    while { pkt_opt = pcap1.next_packet();
+    while { pkt_opt = pcap_arc.next_packet();
             pkt_opt.is_some() } {
         let pkt = pkt_opt.unwrap();
         let dissector = match PacketDissector::new(&filter, pkt.ll_data) {
