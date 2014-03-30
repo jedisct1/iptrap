@@ -1,11 +1,9 @@
 
-#[allow(deprecated_owned_vector)];
-
 extern crate std;
 
+use std::c_vec::CVec;
 use std::mem::size_of;
 use std::mem::{to_be16, from_be16};
-use std::slice;
 
 pub static ETHERTYPE_IP: u16 = 0x0800;
 pub static IPPROTO_TCP: u8 = 6;
@@ -53,33 +51,32 @@ pub struct PacketDissectorFilter {
 }
 
 pub struct PacketDissector {
-    ll_data: ~[u8],
+    ll_data: CVec<u8>,
     etherhdr_ptr: *EtherHeader,
     iphdr_ptr: *IpHeader,
     tcphdr_ptr: *TcpHeader,
-    tcp_data: ~[u8]
+    tcp_data: CVec<u8>
 }
 
 impl PacketDissector {
     pub fn new(filter: &PacketDissectorFilter,
-               ll_data: ~[u8]) -> Result<PacketDissector, ~str> {
+               ll_data: CVec<u8>) -> Result<PacketDissector, ~str> {
         let ll_data_len = ll_data.len();
         if ll_data_len < size_of::<EtherHeader>() {
             return Err(~"Short ethernet frame");
         }
-        let etherhdr_ptr: *EtherHeader = ll_data.as_ptr() as *EtherHeader;
+        let ll_data_ptr = ll_data.as_slice().as_ptr();
+        let etherhdr_ptr: *EtherHeader = ll_data_ptr as *EtherHeader;
         let ref etherhdr = unsafe { *etherhdr_ptr };
-        
         if etherhdr.ether_type != to_be16(ETHERTYPE_IP as i16) as u16 {
             return Err(~"Unsupported type of ethernet frame");
         }
-
         let iphdr_offset: uint = size_of::<EtherHeader>();
         if ll_data_len - iphdr_offset < size_of::<IpHeader>() {
             return Err(~"Short IP packet")
         }
         let iphdr_ptr: *IpHeader = unsafe {
-            ll_data.as_ptr().offset(iphdr_offset as int) as *IpHeader
+            ll_data_ptr.offset(iphdr_offset as int) as *IpHeader
         };
         let ref iphdr: IpHeader = unsafe { *iphdr_ptr };
         let iphdr_len = (iphdr.ip_vhl & 0xf) as uint * 4u;
@@ -102,7 +99,7 @@ impl PacketDissector {
             return Err(~"Short TCP packet");
         }
         let tcphdr_ptr: *TcpHeader = unsafe {
-            ll_data.as_ptr().offset(tcphdr_offset as int) as *TcpHeader
+            ll_data_ptr.offset(tcphdr_offset as int) as *TcpHeader
         };
         let ref tcphdr: TcpHeader = unsafe { *tcphdr_ptr };        
         let tcphdr_data_offset = ((tcphdr.th_off_x2 >> 4) & 0xf) as uint * 4u;
@@ -122,10 +119,11 @@ impl PacketDissector {
         let max_tcp_data_len = ll_data_len - tcp_data_offset;
         let tcp_data_len = std::cmp::min(real_tcp_data_len, max_tcp_data_len);
         let tcp_data_ptr = unsafe {
-            ll_data.as_ptr().offset(tcp_data_offset as int)
+            ll_data_ptr.offset(tcp_data_offset as int)
         };
-        let tcp_data = unsafe { slice::from_buf(tcp_data_ptr, tcp_data_len) };
-
+        let tcp_data = unsafe {
+            CVec::new(tcp_data_ptr as *mut u8, tcp_data_len)
+        };
         Ok(PacketDissector {
                 ll_data: ll_data,
                 etherhdr_ptr: etherhdr_ptr,

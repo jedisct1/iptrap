@@ -1,11 +1,10 @@
 
-#[warn(non_camel_case_types,
-       non_uppercase_statics,
-       unnecessary_qualification,
-       managed_heap_memory)];
-#[allow(deprecated_owned_vector)];
+#![warn(non_camel_case_types,
+        non_uppercase_statics,
+        unnecessary_qualification,
+        managed_heap_memory)]
 
-#[feature(phase)];
+#![feature(phase)]
 #[phase(syntax, link)] extern crate log;
 
 extern crate collections;
@@ -27,18 +26,19 @@ use iptrap::{TH_SYN, TH_ACK, TH_RST};
 use iptrap::{checksum, cookie};
 use serialize::json::ToJson;
 use serialize::json;
+use std::c_vec::CVec;
 use std::io::net::ip::{IpAddr, Ipv4Addr};
 use std::mem::size_of_val;
 use std::mem::{to_be16, to_be32, from_be16, from_be32};
 use std::sync::atomics::{AtomicBool, Relaxed, INIT_ATOMIC_BOOL};
-use std::{os, slice};
+use std::os;
 
 pub mod zmq;
 
 static STREAM_PORT: u16 = 9922;
 static SSH_PORT: u16 = 22;
 
-fn send_tcp_synack(sk: cookie::SipHashKey, chan: &Sender<~[u8]>,
+fn send_tcp_synack(sk: cookie::SipHashKey, chan: &Sender<CVec<u8>>,
                    dissector: &PacketDissector, ts: u64) {
     let ref s_etherhdr: EtherHeader = unsafe { *dissector.etherhdr_ptr };
     assert!(s_etherhdr.ether_type == to_be16(ETHERTYPE_IP as i16) as u16);
@@ -64,18 +64,17 @@ fn send_tcp_synack(sk: cookie::SipHashKey, chan: &Sender<~[u8]>,
     checksum::tcp_header(&sa_packet.iphdr, &mut sa_packet.tcphdr);
 
     let sa_packet_v = unsafe {
-        slice::from_buf(&sa_packet as *EmptyTcpPacket as *u8,
-                        size_of_val(&sa_packet))
+        CVec::new(&sa_packet as *EmptyTcpPacket as *mut u8,
+                  size_of_val(&sa_packet))
     };
     chan.send(sa_packet_v);
 }
 
-fn send_tcp_rst(chan: &Sender<~[u8]>, dissector: &PacketDissector) {
+fn send_tcp_rst(chan: &Sender<CVec<u8>>, dissector: &PacketDissector) {
     let ref s_etherhdr: EtherHeader = unsafe { *dissector.etherhdr_ptr };
     assert!(s_etherhdr.ether_type == to_be16(ETHERTYPE_IP as i16) as u16);
     let ref s_iphdr: IpHeader = unsafe { *dissector.iphdr_ptr };
     let ref s_tcphdr: TcpHeader = unsafe { *dissector.tcphdr_ptr };
-
     let mut rst_packet: EmptyTcpPacket = EmptyTcpPacket::new();
     rst_packet.etherhdr.ether_shost = s_etherhdr.ether_dhost;
     rst_packet.etherhdr.ether_dhost = s_etherhdr.ether_shost;
@@ -91,8 +90,8 @@ fn send_tcp_rst(chan: &Sender<~[u8]>, dissector: &PacketDissector) {
     checksum::tcp_header(&rst_packet.iphdr, &mut rst_packet.tcphdr);
 
     let rst_packet_v = unsafe {
-        slice::from_buf(&rst_packet as *EmptyTcpPacket as *u8,
-                        size_of_val(&rst_packet))
+        CVec::new(&rst_packet as *EmptyTcpPacket as *mut u8,
+                  size_of_val(&rst_packet))
     };
     chan.send(rst_packet_v);
 }
@@ -121,7 +120,7 @@ fn log_tcp_ack(zmq_ctx: &mut zmq::Socket, sk: cookie::SipHashKey,
         }
     }
     let tcp_data_str =
-        std::str::from_utf8_lossy(dissector.tcp_data).into_owned();
+        std::str::from_utf8_lossy(dissector.tcp_data.as_slice()).into_owned();
     let ip_src = s_iphdr.ip_src;
     let dport = from_be16(s_tcphdr.th_dport as i16) as u16;
     let mut record: HashMap<~str, json::Json> = HashMap::with_capacity(4);
@@ -184,7 +183,7 @@ fn main() {
     };
     let pcap_arc = sync::Arc::new(pcap);
     let (packetwriter_chan, packetwriter_port):
-        (Sender<~[u8]>, Receiver<~[u8]>) = channel();
+        (Sender<CVec<u8>>, Receiver<CVec<u8>>) = channel();
     let pcap_arc0 = pcap_arc.clone();
     spawn(proc() {
             loop {
@@ -198,7 +197,6 @@ fn main() {
     static mut time_needs_update: AtomicBool = INIT_ATOMIC_BOOL;
     unsafe { spawn_time_updater(&mut time_needs_update) };
     let mut ts = time::get_time().sec as u64 & !0x3f;
-
     let mut pkt_opt: Option<PcapPacket>;
     while { pkt_opt = pcap_arc.next_packet();
             pkt_opt.is_some() } {

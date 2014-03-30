@@ -1,12 +1,11 @@
 
-#[allow(visible_private_types)];
-#[allow(deprecated_owned_vector)];
+#![allow(visible_private_types)]
 
+use std::c_vec::CVec;
 use std::libc::types::os::common::posix01::timeval;
 use std::libc::{c_void, c_char, c_int};
 use std::ptr;
 use std::str::raw::from_c_str;
-use std::slice;
 
 pub static PCAP_ERRBUF_SIZE: uint = 256;
 
@@ -20,7 +19,7 @@ struct PacketHeader {
 }
 
 pub struct PcapPacket {
-    ll_data: ~[u8]
+    ll_data: CVec<u8>
 }
 
 pub struct Pcap {
@@ -49,7 +48,7 @@ extern {
 
 impl Pcap {
     pub fn open_live(device: ~str) -> Result<Pcap, ~str> {
-        let mut errbuf: ~[c_char] = slice::with_capacity(PCAP_ERRBUF_SIZE);
+        let mut errbuf: Vec<c_char> = Vec::with_capacity(PCAP_ERRBUF_SIZE);
         let device = unsafe { device.to_c_str().unwrap() };
         let pcap = unsafe { pcap_open_live(device, 65536, 1,
                                            500, errbuf.as_mut_ptr()) };
@@ -80,7 +79,7 @@ impl Pcap {
                 let packet_header = unsafe { *packet_header_pnt };
                 let ll_data_len = packet_header.caplen as uint;
                 let ll_data = unsafe {
-                    slice::from_buf(ll_data_pnt, ll_data_len)
+                    CVec::new(ll_data_pnt as *mut u8, ll_data_len)
                 };
                 Some(PcapPacket {
                         ll_data: ll_data
@@ -90,10 +89,11 @@ impl Pcap {
         }
     }
 
-    pub fn send_packet(&self, ll_data: ~[u8]) {
+    pub fn send_packet(&self, ll_data: CVec<u8>) {
         unsafe {
             pcap_sendpacket(self.pcap_,
-                            ll_data.as_ptr(), ll_data.len() as c_int);
+                            ll_data.as_slice().as_ptr(),
+                            ll_data.len() as c_int);
         }
     }
 }
