@@ -1,10 +1,21 @@
 
+extern crate rand;
+
 use std::hash::sip;
 use std::hash::Hash;
 
 pub struct SipHashKey {
     k1: u64,
     k2: u64
+}
+
+impl SipHashKey {
+    pub fn new() -> SipHashKey {
+        SipHashKey {
+            k1: rand::random(),
+            k2: rand::random()
+        }
+    }
 }
 
 #[deriving(Hash)]

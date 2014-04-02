@@ -9,7 +9,6 @@
 
 extern crate collections;
 extern crate iptrap;
-extern crate rand;
 extern crate serialize;
 extern crate sync;
 extern crate time;
@@ -26,9 +25,7 @@ use iptrap::{TH_SYN, TH_ACK, TH_RST};
 use iptrap::{checksum, cookie};
 use serialize::json::ToJson;
 use serialize::json;
-use std::c_vec::CVec;
 use std::io::net::ip::{IpAddr, Ipv4Addr};
-use std::mem::size_of_val;
 use std::mem::{to_be16, to_be32, from_be16, from_be32};
 use std::sync::atomics::{AtomicBool, Relaxed, INIT_ATOMIC_BOOL};
 use std::os;
@@ -38,7 +35,7 @@ pub mod zmq;
 static STREAM_PORT: u16 = 9922;
 static SSH_PORT: u16 = 22;
 
-fn send_tcp_synack(sk: cookie::SipHashKey, chan: &Sender<CVec<u8>>,
+fn send_tcp_synack(sk: cookie::SipHashKey, chan: &Sender<EmptyTcpPacket>,
                    dissector: &PacketDissector, ts: u64) {
     let ref s_etherhdr: EtherHeader = unsafe { *dissector.etherhdr_ptr };
     assert!(s_etherhdr.ether_type == to_be16(ETHERTYPE_IP as i16) as u16);
@@ -63,14 +60,10 @@ fn send_tcp_synack(sk: cookie::SipHashKey, chan: &Sender<CVec<u8>>,
                     sk, ts);
     checksum::tcp_header(&sa_packet.iphdr, &mut sa_packet.tcphdr);
 
-    let sa_packet_v = unsafe {
-        CVec::new(&sa_packet as *EmptyTcpPacket as *mut u8,
-                  size_of_val(&sa_packet))
-    };
-    chan.send(sa_packet_v);
+    chan.send(sa_packet);
 }
 
-fn send_tcp_rst(chan: &Sender<CVec<u8>>, dissector: &PacketDissector) {
+fn send_tcp_rst(chan: &Sender<EmptyTcpPacket>, dissector: &PacketDissector) {
     let ref s_etherhdr: EtherHeader = unsafe { *dissector.etherhdr_ptr };
     assert!(s_etherhdr.ether_type == to_be16(ETHERTYPE_IP as i16) as u16);
     let ref s_iphdr: IpHeader = unsafe { *dissector.iphdr_ptr };
@@ -89,11 +82,7 @@ fn send_tcp_rst(chan: &Sender<CVec<u8>>, dissector: &PacketDissector) {
     rst_packet.tcphdr.th_flags = TH_RST | TH_ACK;
     checksum::tcp_header(&rst_packet.iphdr, &mut rst_packet.tcphdr);
 
-    let rst_packet_v = unsafe {
-        CVec::new(&rst_packet as *EmptyTcpPacket as *mut u8,
-                  size_of_val(&rst_packet))
-    };
-    chan.send(rst_packet_v);
+    chan.send(rst_packet);
 }
 
 fn log_tcp_ack(zmq_ctx: &mut zmq::Socket, sk: cookie::SipHashKey,
@@ -174,20 +163,16 @@ fn main() {
         DataLinkTypeEthernet => (),
         _ => fail!("Unsupported data link type")
     }
-    let sk = cookie::SipHashKey {
-        k1: rand::random(),
-        k2: rand::random()
-    };
-    let filter = PacketDissectorFilter {
-        local_ip: local_ip
-    };
+    let sk = cookie::SipHashKey::new();
+    let filter = PacketDissectorFilter::new(local_ip);
     let pcap_arc = sync::Arc::new(pcap);
     let (packetwriter_chan, packetwriter_port):
-        (Sender<CVec<u8>>, Receiver<CVec<u8>>) = channel();
+        (Sender<EmptyTcpPacket>, Receiver<EmptyTcpPacket>) = channel();
     let pcap_arc0 = pcap_arc.clone();
     spawn(proc() {
             loop {
-                pcap_arc0.send_packet(packetwriter_port.recv());
+                let pkt = packetwriter_port.recv();
+                let _ = pcap_arc0.send_packet(&pkt);
             }
         });
     let mut zmq_ctx = zmq::Context::new();

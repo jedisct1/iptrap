@@ -4,6 +4,7 @@
 use std::c_vec::CVec;
 use std::libc::types::os::common::posix01::timeval;
 use std::libc::{c_void, c_char, c_int};
+use std::mem;
 use std::ptr;
 use std::str::raw::from_c_str;
 
@@ -19,7 +20,7 @@ struct PacketHeader {
 }
 
 pub struct PcapPacket {
-    ll_data: CVec<u8>
+    pub ll_data: CVec<u8>
 }
 
 pub struct Pcap {
@@ -89,11 +90,14 @@ impl Pcap {
         }
     }
 
-    pub fn send_packet(&self, ll_data: CVec<u8>) {
-        unsafe {
-            pcap_sendpacket(self.pcap_,
-                            ll_data.as_slice().as_ptr(),
-                            ll_data.len() as c_int);
+    pub fn send_packet<T: Copy>(&self, data: &T) -> Result<(), ~str> {
+        let ll_data = data as *T as *u8;
+        let ll_data_len = mem::size_of_val(data);
+        match unsafe {
+            pcap_sendpacket(self.pcap_, ll_data, ll_data_len as i32)
+        } {
+            0 => Ok(()),
+            _ => Err(~"Unable to send packet")
         }
     }
 }

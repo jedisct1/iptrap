@@ -8,10 +8,10 @@ use std::mem::size_of;
 
 #[packed]
 pub struct EmptyTcpPacket {
-    etherhdr: EtherHeader,
-    iphdr: IpHeader,
-    tcphdr: TcpHeader,
-    tcpoptions: [u8, ..4]
+    pub etherhdr: EtherHeader,
+    pub iphdr: IpHeader,
+    pub tcphdr: TcpHeader,
+    pub tcpoptions: [u8, ..4]
 }
 
 impl EmptyTcpPacket {

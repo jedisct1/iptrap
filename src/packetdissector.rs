@@ -14,48 +14,56 @@ pub static TH_PUSH: u8 = 0x08;
 
 #[packed]
 pub struct EtherHeader {
-    ether_dhost: [u8, ..6],
-    ether_shost: [u8, ..6],
-    ether_type: u16
+    pub ether_dhost: [u8, ..6],
+    pub ether_shost: [u8, ..6],
+    pub ether_type: u16
 }
 
 #[packed]
 pub struct IpHeader {
-    ip_vhl: u8,
-    ip_tos: u8,
-    ip_len: u16,
-    ip_id: u16,
-    ip_off: u16,
-    ip_ttl: u8,
-    ip_p: u8,
-    ip_sum: u16,
-    ip_src: [u8, ..4],
-    ip_dst: [u8, ..4]
+    pub ip_vhl: u8,
+    pub ip_tos: u8,
+    pub ip_len: u16,
+    pub ip_id: u16,
+    pub ip_off: u16,
+    pub ip_ttl: u8,
+    pub ip_p: u8,
+    pub ip_sum: u16,
+    pub ip_src: [u8, ..4],
+    pub ip_dst: [u8, ..4]
 }
 
 #[packed]
 pub struct TcpHeader {
-    th_sport: u16,
-    th_dport: u16,
-    th_seq: u32,
-    th_ack: u32,
-    th_off_x2: u8,
-    th_flags: u8,
-    th_win: u16,
-    th_sum: u16,
-    th_urp: u16
+    pub th_sport: u16,
+    pub th_dport: u16,
+    pub th_seq: u32,
+    pub th_ack: u32,
+    pub th_off_x2: u8,
+    pub th_flags: u8,
+    pub th_win: u16,
+    pub th_sum: u16,
+    pub th_urp: u16
 }
 
 pub struct PacketDissectorFilter {
     local_ip: ~[u8]
 }
 
+impl PacketDissectorFilter {
+    pub fn new(local_ip: ~[u8]) -> PacketDissectorFilter {
+        PacketDissectorFilter {
+            local_ip: local_ip
+        }
+    }
+}
+
 pub struct PacketDissector {
-    ll_data: CVec<u8>,
-    etherhdr_ptr: *EtherHeader,
-    iphdr_ptr: *IpHeader,
-    tcphdr_ptr: *TcpHeader,
-    tcp_data: CVec<u8>
+    pub ll_data: CVec<u8>,
+    pub etherhdr_ptr: *EtherHeader,
+    pub iphdr_ptr: *IpHeader,
+    pub tcphdr_ptr: *TcpHeader,
+    pub tcp_data: CVec<u8>
 }
 
 impl PacketDissector {
