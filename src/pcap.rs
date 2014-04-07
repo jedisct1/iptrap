@@ -1,9 +1,11 @@
 
 #![allow(visible_private_types)]
 
+extern crate libc;
+
+use libc::types::os::common::posix01::timeval;
+use libc::{c_void, c_char, c_int};
 use std::c_vec::CVec;
-use std::libc::types::os::common::posix01::timeval;
-use std::libc::{c_void, c_char, c_int};
 use std::mem;
 use std::ptr;
 use std::str::raw::from_c_str;

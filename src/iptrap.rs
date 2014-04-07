@@ -9,6 +9,7 @@
 
 extern crate collections;
 extern crate iptrap;
+extern crate libc;
 extern crate serialize;
 extern crate sync;
 extern crate time;

@@ -1,7 +1,9 @@
 //! Module: zmq
 
-use std::{libc, mem, ptr, str, slice};
-use std::libc::{c_int, c_long, c_void, size_t, c_char};
+extern crate libc;
+
+use libc::{c_int, c_long, c_void, size_t, c_char};
+use std::{mem, ptr, str, slice};
 use std::fmt;
 
 /// The ZMQ container that manages all the sockets

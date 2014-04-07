@@ -1,6 +1,7 @@
 
-use std::libc;
-use std::libc::{uid_t, gid_t, c_int, c_void};
+extern crate libc;
+
+use libc::{uid_t, gid_t, c_int, c_void};
 
 pub fn switch_user(uid: Option<uid_t>, gid: Option<gid_t>) {
     match gid {

@@ -7,6 +7,8 @@
         unnecessary_qualification,
         managed_heap_memory)]
 
+extern crate libc;
+
 pub use emptytcppacket::*;
 pub use packetdissector::*;
 pub use pcap::*;
