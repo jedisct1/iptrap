@@ -19,7 +19,7 @@ impl EmptyTcpPacket {
         let etherhdr = EtherHeader {
             ether_dhost: [0u8, ..6],
             ether_shost: [0u8, ..6],
-            ether_type: to_be16(ETHERTYPE_IP as i16) as u16
+            ether_type: to_be16(ETHERTYPE_IP)
         };
         let tcpoptions = [ 0x2u8, 0x4u8, 0x5u8, 0xb4u8 ];
         let iphdr = IpHeader {
@@ -27,7 +27,7 @@ impl EmptyTcpPacket {
             ip_tos: 0u8,
             ip_len: to_be16((size_of::<IpHeader>() +
                              size_of::<TcpHeader>() +
-                             tcpoptions.len()) as i16) as u16,
+                             tcpoptions.len()) as u16),
             ip_id: rand::random(),
             ip_off: 0u16,
             ip_ttl: 42u8,

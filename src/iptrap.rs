@@ -39,7 +39,7 @@ static SSH_PORT: u16 = 22;
 fn send_tcp_synack(sk: cookie::SipHashKey, chan: &Sender<EmptyTcpPacket>,
                    dissector: &PacketDissector, ts: u64) {
     let ref s_etherhdr: EtherHeader = unsafe { *dissector.etherhdr_ptr };
-    assert!(s_etherhdr.ether_type == to_be16(ETHERTYPE_IP as i16) as u16);
+    assert!(s_etherhdr.ether_type == to_be16(ETHERTYPE_IP));
     let ref s_iphdr: IpHeader = unsafe { *dissector.iphdr_ptr };
     let ref s_tcphdr: TcpHeader = unsafe { *dissector.tcphdr_ptr };
 
@@ -54,7 +54,7 @@ fn send_tcp_synack(sk: cookie::SipHashKey, chan: &Sender<EmptyTcpPacket>,
     sa_packet.tcphdr.th_dport = s_tcphdr.th_sport;
     sa_packet.tcphdr.th_flags = TH_SYN | TH_ACK;
     sa_packet.tcphdr.th_ack = to_be32(
-        (from_be32(s_tcphdr.th_seq as i32) as u32 + 1u32) as i32) as u32;
+        (from_be32(s_tcphdr.th_seq) + 1u32));
     sa_packet.tcphdr.th_seq =
         cookie::tcp(sa_packet.iphdr.ip_src, sa_packet.iphdr.ip_dst,
                     sa_packet.tcphdr.th_sport, sa_packet.tcphdr.th_dport,
@@ -66,7 +66,7 @@ fn send_tcp_synack(sk: cookie::SipHashKey, chan: &Sender<EmptyTcpPacket>,
 
 fn send_tcp_rst(chan: &Sender<EmptyTcpPacket>, dissector: &PacketDissector) {
     let ref s_etherhdr: EtherHeader = unsafe { *dissector.etherhdr_ptr };
-    assert!(s_etherhdr.ether_type == to_be16(ETHERTYPE_IP as i16) as u16);
+    assert!(s_etherhdr.ether_type == to_be16(ETHERTYPE_IP));
     let ref s_iphdr: IpHeader = unsafe { *dissector.iphdr_ptr };
     let ref s_tcphdr: TcpHeader = unsafe { *dissector.tcphdr_ptr };
     let mut rst_packet: EmptyTcpPacket = EmptyTcpPacket::new();
@@ -96,15 +96,13 @@ fn log_tcp_ack(zmq_ctx: &mut zmq::Socket, sk: cookie::SipHashKey,
     let ack_cookie = cookie::tcp(s_iphdr.ip_dst, s_iphdr.ip_src,
                                  s_tcphdr.th_dport, s_tcphdr.th_sport,
                                  sk, ts);
-    let wanted_cookie = to_be32((from_be32(ack_cookie as i32) as u32
-                                 + 1u32) as i32) as u32;
+    let wanted_cookie = to_be32((from_be32(ack_cookie) + 1u32));
     if s_tcphdr.th_ack != wanted_cookie {
         let ts_alt = ts - 0x40;
         let ack_cookie_alt = cookie::tcp(s_iphdr.ip_dst, s_iphdr.ip_src,
                                          s_tcphdr.th_dport, s_tcphdr.th_sport,
                                          sk, ts_alt);
-        let wanted_cookie_alt = to_be32((from_be32(ack_cookie_alt as i32) as u32
-                                         + 1u32) as i32) as u32;
+        let wanted_cookie_alt = to_be32((from_be32(ack_cookie_alt) + 1u32));
         if s_tcphdr.th_ack != wanted_cookie_alt {
             return false;
         }
@@ -112,7 +110,7 @@ fn log_tcp_ack(zmq_ctx: &mut zmq::Socket, sk: cookie::SipHashKey,
     let tcp_data_str =
         std::str::from_utf8_lossy(dissector.tcp_data.as_slice()).into_owned();
     let ip_src = s_iphdr.ip_src;
-    let dport = from_be16(s_tcphdr.th_dport as i16) as u16;
+    let dport = from_be16(s_tcphdr.th_dport);
     let mut record: HashMap<~str, json::Json> = HashMap::with_capacity(4);
     record.insert(~"ts", json::Number(ts as f64));
     record.insert(~"ip_src", json::String(format!("{}.{}.{}.{}",
@@ -141,8 +139,7 @@ fn spawn_time_updater(time_needs_update: &'static mut AtomicBool) {
 
 fn packet_should_be_bypassed(dissector: &PacketDissector) -> bool {
     let th_dport = unsafe { *dissector.tcphdr_ptr }.th_dport;
-    th_dport == to_be16(STREAM_PORT as i16) as u16 ||
-    th_dport == to_be16(SSH_PORT as i16) as u16
+    th_dport == to_be16(STREAM_PORT) || th_dport == to_be16(SSH_PORT)
 }
 
 fn main() {

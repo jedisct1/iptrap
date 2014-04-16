@@ -76,7 +76,7 @@ impl PacketDissector {
         let ll_data_ptr = ll_data.as_slice().as_ptr();
         let etherhdr_ptr: *EtherHeader = ll_data_ptr as *EtherHeader;
         let ref etherhdr = unsafe { *etherhdr_ptr };
-        if etherhdr.ether_type != to_be16(ETHERTYPE_IP as i16) as u16 {
+        if etherhdr.ether_type != to_be16(ETHERTYPE_IP) {
             return Err(~"Unsupported type of ethernet frame");
         }
         let iphdr_offset: uint = size_of::<EtherHeader>();
@@ -119,7 +119,7 @@ impl PacketDissector {
         }
         let tcp_data_offset = tcphdr_offset + tcphdr_data_offset;
 
-        let ip_len = from_be16(iphdr.ip_len as i16) as uint;
+        let ip_len = from_be16(iphdr.ip_len) as uint;
         if ip_len < tcp_data_offset - tcp_data_offset {
             return Err(~"Truncated TCP packet - truncated data");
         }

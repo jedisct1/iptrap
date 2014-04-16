@@ -17,7 +17,7 @@ pub fn ip_header(iphdr: &mut IpHeader) {
         sum = (sum & 0xffff) + (sum >> 16);
     }
     let iphdr: &mut IpHeader = unsafe { &mut *(iphdr_ptr as *mut IpHeader) };
-    iphdr.ip_sum = to_be16(!(sum as u16) as i16) as u16;
+    iphdr.ip_sum = to_be16(!(sum as u16));
 }
 
 pub fn tcp_header(iphdr: &IpHeader, tcphdr: &mut TcpHeader) {
@@ -42,5 +42,5 @@ pub fn tcp_header(iphdr: &IpHeader, tcphdr: &mut TcpHeader) {
         sum = (sum & 0xffff) + (sum >> 16);
     }
     let tcphdr: &mut TcpHeader = unsafe { &mut *(tcphdr_ptr as *mut TcpHeader) };
-    tcphdr.th_sum = to_be16(!(sum as u16) as i16) as u16;
+    tcphdr.th_sum = to_be16(!(sum as u16));
 }
