@@ -68,20 +68,20 @@ pub struct PacketDissector {
 
 impl PacketDissector {
     pub fn new(filter: &PacketDissectorFilter,
-               ll_data: CVec<u8>) -> Result<PacketDissector, ~str> {
+               ll_data: CVec<u8>) -> Result<PacketDissector, &str> {
         let ll_data_len = ll_data.len();
         if ll_data_len < size_of::<EtherHeader>() {
-            return Err(~"Short ethernet frame");
+            return Err("Short ethernet frame");
         }
         let ll_data_ptr = ll_data.as_slice().as_ptr();
         let etherhdr_ptr: *EtherHeader = ll_data_ptr as *EtherHeader;
         let ref etherhdr = unsafe { *etherhdr_ptr };
         if etherhdr.ether_type != to_be16(ETHERTYPE_IP) {
-            return Err(~"Unsupported type of ethernet frame");
+            return Err("Unsupported type of ethernet frame");
         }
         let iphdr_offset: uint = size_of::<EtherHeader>();
         if ll_data_len - iphdr_offset < size_of::<IpHeader>() {
-            return Err(~"Short IP packet")
+            return Err("Short IP packet")
         }
         let iphdr_ptr: *IpHeader = unsafe {
             ll_data_ptr.offset(iphdr_offset as int) as *IpHeader
@@ -90,21 +90,21 @@ impl PacketDissector {
         let iphdr_len = (iphdr.ip_vhl & 0xf) as uint * 4u;
         if iphdr_len < size_of::<IpHeader>() ||
             ll_data_len - iphdr_offset < iphdr_len {
-            return Err(~"Short IP packet")
+            return Err("Short IP packet")
         }
         let ip_version = (iphdr.ip_vhl >> 4) & 0xf;
         if ip_version != 4 {
-            return Err(~"Unsupported IP version");
+            return Err("Unsupported IP version");
         }
         if iphdr.ip_p != IPPROTO_TCP {
-            return Err(~"Unsupported IP protocol");
+            return Err("Unsupported IP protocol");
         }
         if filter.local_ip.ne(&iphdr.ip_dst.into_owned()) {
-            return Err(~"Packet destination is not the local IP");
+            return Err("Packet destination is not the local IP");
         }
         let tcphdr_offset = iphdr_offset + iphdr_len;
         if ll_data_len - tcphdr_offset < size_of::<TcpHeader>() {
-            return Err(~"Short TCP packet");
+            return Err("Short TCP packet");
         }
         let tcphdr_ptr: *TcpHeader = unsafe {
             ll_data_ptr.offset(tcphdr_offset as int) as *TcpHeader
@@ -112,16 +112,16 @@ impl PacketDissector {
         let ref tcphdr: TcpHeader = unsafe { *tcphdr_ptr };        
         let tcphdr_data_offset = ((tcphdr.th_off_x2 >> 4) & 0xf) as uint * 4u;
         if tcphdr_data_offset < size_of::<TcpHeader>() {
-            return Err(~"Short TCP data offset");
+            return Err("Short TCP data offset");
         }
         if ll_data_len - tcphdr_offset < tcphdr_data_offset {
-            return Err(~"Truncated TCP packet - no data");
+            return Err("Truncated TCP packet - no data");
         }
         let tcp_data_offset = tcphdr_offset + tcphdr_data_offset;
 
         let ip_len = from_be16(iphdr.ip_len) as uint;
         if ip_len < tcp_data_offset - tcp_data_offset {
-            return Err(~"Truncated TCP packet - truncated data");
+            return Err("Truncated TCP packet - truncated data");
         }
         let real_tcp_data_len = ip_len - iphdr_len - tcphdr_data_offset;
         let max_tcp_data_len = ll_data_len - tcp_data_offset;

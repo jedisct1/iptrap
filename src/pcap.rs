@@ -92,14 +92,14 @@ impl Pcap {
         }
     }
 
-    pub fn send_packet<T: Copy>(&self, data: &T) -> Result<(), ~str> {
+    pub fn send_packet<T: Copy>(&self, data: &T) -> Result<(), &str> {
         let ll_data = data as *T as *u8;
         let ll_data_len = mem::size_of_val(data);
         match unsafe {
             pcap_sendpacket(self.pcap_, ll_data, ll_data_len as i32)
         } {
             0 => Ok(()),
-            _ => Err(~"Unable to send packet")
+            _ => Err("Unable to send packet")
         }
     }
 }
