@@ -111,13 +111,13 @@ fn log_tcp_ack(zmq_ctx: &mut zmq::Socket, sk: cookie::SipHashKey,
         std::str::from_utf8_lossy(dissector.tcp_data.as_slice()).into_owned();
     let ip_src = s_iphdr.ip_src;
     let dport = from_be16(s_tcphdr.th_dport);
-    let mut record: HashMap<~str, json::Json> = HashMap::with_capacity(4);
-    record.insert("ts".to_owned(), json::Number(ts as f64));
-    record.insert("ip_src".to_owned(), json::String(format!("{}.{}.{}.{}",
-                                                    ip_src[0], ip_src[1],
-                                                    ip_src[2], ip_src[3])));
-    record.insert("dport".to_owned(), json::Number(dport as f64));
-    record.insert("payload".to_owned(), json::String(tcp_data_str.escape_default_except_lf()));
+    let mut record: HashMap<StrBuf, json::Json> = HashMap::with_capacity(4);
+    record.insert("ts".to_strbuf(), json::Number(ts as f64));
+    record.insert("ip_src".to_strbuf(), json::String(format!("{}.{}.{}.{}",
+                                                            ip_src[0], ip_src[1],
+                                                            ip_src[2], ip_src[3]).to_strbuf()));
+    record.insert("dport".to_strbuf(), json::Number(dport as f64));
+    record.insert("payload".to_strbuf(), json::String(tcp_data_str.escape_default_except_lf().to_strbuf()));
     let json = record.to_json().to_str();
     let _ = zmq_ctx.send(json.as_bytes(), 0);
     info!("{}", json);
