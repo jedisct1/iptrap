@@ -1,9 +1,9 @@
 
-pub trait StrSliceEscape<'a> {
+pub trait StrSliceEscape {
     fn escape_default_except_lf(&self) -> StrBuf;
 }
 
-impl<'a> StrSliceEscape<'a> for &'a StrBuf {
+impl StrSliceEscape for StrBuf {
     fn escape_default_except_lf(&self) -> StrBuf {
         let mut out = StrBuf::with_capacity(self.len());
         for c in self.as_slice().chars() {

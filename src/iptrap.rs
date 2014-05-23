@@ -147,7 +147,7 @@ fn main() {
     if args.len() != 5 {
         return usage();
     }
-    let local_addr = match from_str::<IpAddr>(*args.get(2)) {
+    let local_addr = match from_str::<IpAddr>(args.get(2).as_slice()) {
         Some(local_ip) => local_ip,
         None => { return usage(); }
     };
@@ -155,8 +155,8 @@ fn main() {
         Ipv4Addr(a, b, c, d) => box [a, b, c, d],
         _ => fail!("Only IPv4 is supported for now")
     };
-    let pcap = Pcap::open_live(args.get(1).to_owned()).unwrap();
-    privilegesdrop::switch_user(from_str(*args.get(3)), from_str(*args.get(4)));
+    let pcap = Pcap::open_live(args.get(1).as_slice()).unwrap();
+    privilegesdrop::switch_user(from_str(args.get(3).as_slice()), from_str(args.get(4).as_slice()));
     match pcap.data_link_type() {
         DataLinkTypeEthernet => (),
         _ => fail!("Unsupported data link type")
@@ -176,7 +176,7 @@ fn main() {
     let mut zmq_ctx = zmq::Context::new();
     let mut zmq_socket = zmq_ctx.socket(zmq::PUB).unwrap();
     let _ = zmq_socket.set_linger(1);
-    let _ = zmq_socket.bind("tcp://0.0.0.0:" + STREAM_PORT.to_str());
+    let _ = zmq_socket.bind(format!("tcp://0.0.0.0:{}", STREAM_PORT).as_slice());
     static mut time_needs_update: AtomicBool = INIT_ATOMIC_BOOL;
     unsafe { spawn_time_updater(&mut time_needs_update) };
     let mut ts = time::get_time().sec as u64 & !0x3f;
