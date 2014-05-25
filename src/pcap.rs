@@ -50,7 +50,7 @@ extern {
 }
 
 impl Pcap {
-    pub fn open_live(device: &str) -> Result<Pcap, StrBuf> {
+    pub fn open_live(device: &str) -> Result<Pcap, String> {
         let mut errbuf: Vec<c_char> = Vec::with_capacity(PCAP_ERRBUF_SIZE);
         let device = unsafe { device.to_c_str().unwrap() };
         let pcap = unsafe { pcap_open_live(device, 65536, 1,
