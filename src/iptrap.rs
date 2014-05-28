@@ -112,12 +112,12 @@ fn log_tcp_ack(zmq_ctx: &mut zmq::Socket, sk: cookie::SipHashKey,
     let ip_src = s_iphdr.ip_src;
     let dport = from_be16(s_tcphdr.th_dport);
     let mut record: HashMap<String, json::Json> = HashMap::with_capacity(4);
-    record.insert("ts".to_strbuf(), json::Number(ts as f64));
-    record.insert("ip_src".to_strbuf(), json::String(format!("{}.{}.{}.{}",
+    record.insert("ts".to_string(), json::Number(ts as f64));
+    record.insert("ip_src".to_string(), json::String(format!("{}.{}.{}.{}",
                                                             ip_src[0], ip_src[1],
-                                                            ip_src[2], ip_src[3]).to_strbuf()));
-    record.insert("dport".to_strbuf(), json::Number(dport as f64));
-    record.insert("payload".to_strbuf(), json::String(tcp_data_str.escape_default_except_lf().to_strbuf()));
+                                                            ip_src[2], ip_src[3]).to_string()));
+    record.insert("dport".to_string(), json::Number(dport as f64));
+    record.insert("payload".to_string(), json::String(tcp_data_str.escape_default_except_lf().to_string()));
     let json = record.to_json().to_str();
     let _ = zmq_ctx.send(json.as_bytes(), 0);
     info!("{}", json);
