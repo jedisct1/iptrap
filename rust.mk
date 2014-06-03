@@ -4,6 +4,9 @@ RUSTC?=rustc
 # The flags to pass to the rust compiler
 RUSTFLAGS?=-O
 
+# The linker flags
+RUSTLDFLAGS?=-L/usr/local/lib
+
 # The output directory to place the binaries in
 RUST_OUT_DIR?=build
 
@@ -33,6 +36,7 @@ $$($(1)_OUT): $(2)
 	$$(RUSTC) $$(RUSTFLAGS) \
 		--dep-info=$$($(1)_DEPFILE) \
 		-o $$($(1)_OUT) \
+		$$(RUSTLDFLAGS) \
 		-L $$(RUST_OUT_DIR) \
 		$(2) $(3)
 
