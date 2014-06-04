@@ -5,7 +5,7 @@ RUSTC?=rustc
 RUSTFLAGS?=-O
 
 # The linker flags
-RUSTLDFLAGS?=-L/usr/local/lib
+RUSTLDFLAGS?=
 
 # The output directory to place the binaries in
 RUST_OUT_DIR?=build
