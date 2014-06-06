@@ -14,7 +14,6 @@ extern crate serialize;
 extern crate sync;
 extern crate time;
 
-use collections::HashMap;
 use iptrap::ETHERTYPE_IP;
 use iptrap::EmptyTcpPacket;
 use iptrap::privilegesdrop;
@@ -26,6 +25,7 @@ use iptrap::{TH_SYN, TH_ACK, TH_RST};
 use iptrap::{checksum, cookie};
 use serialize::json::ToJson;
 use serialize::json;
+use std::collections::HashMap;
 use std::io::net::ip::{IpAddr, Ipv4Addr};
 use std::mem::{to_be16, to_be32, from_be16, from_be32};
 use std::sync::atomics::{AtomicBool, Relaxed, INIT_ATOMIC_BOOL};
