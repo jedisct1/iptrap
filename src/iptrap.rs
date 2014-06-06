@@ -7,7 +7,6 @@
 #![feature(phase)]
 #[phase(syntax, link)] extern crate log;
 
-extern crate collections;
 extern crate iptrap;
 extern crate libc;
 extern crate serialize;
