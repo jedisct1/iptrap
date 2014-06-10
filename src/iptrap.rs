@@ -5,7 +5,7 @@
         managed_heap_memory)]
 
 #![feature(phase)]
-#[phase(syntax, link)] extern crate log;
+#[phase(plugin, link)] extern crate log;
 
 extern crate iptrap;
 extern crate libc;
