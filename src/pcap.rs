@@ -14,6 +14,7 @@ pub static PCAP_ERRBUF_SIZE: uint = 256;
 
 type Pcap_ = * mut c_void;
 
+#[allow(dead_code)]
 struct PacketHeader {
     ts: timeval,
     caplen: u32,
