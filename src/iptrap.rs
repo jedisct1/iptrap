@@ -153,7 +153,7 @@ fn main() {
         None => { return usage(); }
     };
     let local_ip = match local_addr {
-        Ipv4Addr(a, b, c, d) => box [a, b, c, d],
+        Ipv4Addr(a, b, c, d) => vec!(a, b, c, d),
         _ => fail!("Only IPv4 is supported for now")
     };
     let pcap = Pcap::open_live(args.get(1).as_slice()).unwrap();

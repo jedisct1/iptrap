@@ -374,7 +374,7 @@ impl Socket {
         }
     }
 
-    pub fn recv_bytes(&mut self, flags: int) -> Result<~[u8], Error> {
+    pub fn recv_bytes(&mut self, flags: int) -> Result<Vec<u8>, Error> {
         match self.recv_msg(flags) {
             Ok(msg) => Ok(msg.to_bytes()),
             Err(e) => Err(e),
@@ -452,7 +452,7 @@ impl Socket {
         getsockopt_u64(self.sock, ZMQ_AFFINITY.to_raw())
     }
 
-    pub fn get_identity(&self) -> Result<~[u8], Error> {
+    pub fn get_identity(&self) -> Result<Vec<u8>, Error> {
         getsockopt_bytes(self.sock, ZMQ_IDENTITY.to_raw())
     }
 
@@ -614,7 +614,7 @@ impl Message {
             self.with_bytes(|v| f(str::from_utf8(v).unwrap()))
     }
 
-    pub fn to_bytes(&self) -> ~[u8] {
+    pub fn to_bytes(&self) -> Vec<u8> {
         self.with_bytes(|v| v.to_owned())
     }
 
@@ -719,7 +719,7 @@ fn getsockopt_u64(sock: Socket_, opt: c_int) -> Result<u64, Error> {
     if r == -1i32 { Err(errno_to_error()) } else { Ok(value) }
 }
 
-fn getsockopt_bytes(sock: Socket_, opt: c_int) -> Result<~[u8], Error> {
+fn getsockopt_bytes(sock: Socket_, opt: c_int) -> Result<Vec<u8>, Error> {
     // The only binary option in zeromq is ZMQ_IDENTITY, which can have
     // a max size of 255 bytes.
     let size = 255 as size_t;

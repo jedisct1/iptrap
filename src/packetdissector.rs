@@ -47,11 +47,11 @@ pub struct TcpHeader {
 }
 
 pub struct PacketDissectorFilter {
-    local_ip: ~[u8]
+    local_ip: Vec<u8>
 }
 
 impl PacketDissectorFilter {
-    pub fn new(local_ip: ~[u8]) -> PacketDissectorFilter {
+    pub fn new(local_ip: Vec<u8>) -> PacketDissectorFilter {
         PacketDissectorFilter {
             local_ip: local_ip
         }
