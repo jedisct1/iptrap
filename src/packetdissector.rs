@@ -3,7 +3,6 @@ extern crate std;
 
 use std::c_vec::CVec;
 use std::mem::size_of;
-use std::mem::{to_be16, from_be16};
 
 pub static ETHERTYPE_IP: u16 = 0x0800;
 pub static IPPROTO_TCP: u8 = 6;
@@ -76,7 +75,7 @@ impl PacketDissector {
         let ll_data_ptr = ll_data.as_slice().as_ptr();
         let etherhdr_ptr: *EtherHeader = ll_data_ptr as *EtherHeader;
         let ref etherhdr = unsafe { *etherhdr_ptr };
-        if etherhdr.ether_type != to_be16(ETHERTYPE_IP) {
+        if etherhdr.ether_type != ETHERTYPE_IP.to_be() {
             return Err("Unsupported type of ethernet frame");
         }
         let iphdr_offset: uint = size_of::<EtherHeader>();
@@ -119,7 +118,7 @@ impl PacketDissector {
         }
         let tcp_data_offset = tcphdr_offset + tcphdr_data_offset;
 
-        let ip_len = from_be16(iphdr.ip_len) as uint;
+        let ip_len = Int::from_be(iphdr.ip_len) as uint;
         if ip_len < tcp_data_offset - tcp_data_offset {
             return Err("Truncated TCP packet - truncated data");
         }
