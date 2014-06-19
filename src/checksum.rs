@@ -3,7 +3,6 @@ use packetdissector::{IpHeader, TcpHeader};
 use std::c_vec::CVec;
 use std::iter;
 use std::mem::size_of_val;
-use std::mem::to_be16;
 
 pub fn ip_header(iphdr: &mut IpHeader) {
     let iphdr_len = size_of_val(iphdr);
@@ -17,7 +16,7 @@ pub fn ip_header(iphdr: &mut IpHeader) {
         sum = (sum & 0xffff) + (sum >> 16);
     }
     let iphdr: &mut IpHeader = unsafe { &mut *(iphdr_ptr as *mut IpHeader) };
-    iphdr.ip_sum = to_be16(!(sum as u16));
+    iphdr.ip_sum = (!(sum as u16)).to_be();
 }
 
 pub fn tcp_header(iphdr: &IpHeader, tcphdr: &mut TcpHeader) {
@@ -42,5 +41,5 @@ pub fn tcp_header(iphdr: &IpHeader, tcphdr: &mut TcpHeader) {
         sum = (sum & 0xffff) + (sum >> 16);
     }
     let tcphdr: &mut TcpHeader = unsafe { &mut *(tcphdr_ptr as *mut TcpHeader) };
-    tcphdr.th_sum = to_be16(!(sum as u16));
+    tcphdr.th_sum = (!(sum as u16)).to_be();
 }
