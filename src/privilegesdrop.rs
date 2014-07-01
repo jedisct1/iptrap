@@ -15,9 +15,9 @@ pub fn switch_user(uid: Option<uid_t>, gid: Option<gid_t>) {
     match uid {
         Some(uid) => {
             extern {
-                fn setgroups(ngroups: c_int, ptr: *c_void) -> c_int;
+                fn setgroups(ngroups: c_int, ptr: *const c_void) -> c_int;
             }
-            let _ = unsafe { setgroups(0, 0 as *c_void) };
+            let _ = unsafe { setgroups(0, 0 as *const c_void) };
             if unsafe { libc::setuid(uid) } != 0 {
                 fail!("setuid()");
             }

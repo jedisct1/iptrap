@@ -12,7 +12,7 @@ use std::str::raw::from_c_str;
 
 pub static PCAP_ERRBUF_SIZE: uint = 256;
 
-type Pcap_ = * mut c_void;
+type Pcap_ = *mut c_void;
 
 #[allow(dead_code)]
 struct PacketHeader {
@@ -37,17 +37,17 @@ pub enum DataLinkType {
 
 #[link(name = "pcap")]
 extern {
-    pub fn pcap_open_live(device: *c_char, snaplen: c_int, promisc: c_int,
+    pub fn pcap_open_live(device: *const c_char, snaplen: c_int, promisc: c_int,
                           to_ms: c_int, errbuf: *mut c_char) -> Pcap_;
 
     pub fn pcap_close(pcap: Pcap_);
 
     pub fn pcap_datalink(pcap: Pcap_) -> c_int;
 
-    pub fn pcap_next_ex(pcap: Pcap_, pkthdr: * mut *PacketHeader,
-                        ll_data: *mut *u8) -> c_int;
+    pub fn pcap_next_ex(pcap: Pcap_, pkthdr: *mut *const PacketHeader,
+                        ll_data: *mut *const u8) -> c_int;
 
-    pub fn pcap_sendpacket(pcap: Pcap_, ll_data: *u8, len: c_int) -> c_int;
+    pub fn pcap_sendpacket(pcap: Pcap_, ll_data: *const u8, len: c_int) -> c_int;
 }
 
 impl Pcap {
@@ -73,8 +73,8 @@ impl Pcap {
     }
 
     pub fn next_packet(&self) -> Option<PcapPacket> {
-        let mut packet_header_pnt: *PacketHeader = ptr::null();
-        let mut ll_data_pnt: *u8 = ptr::null();
+        let mut packet_header_pnt: *const PacketHeader = ptr::null();
+        let mut ll_data_pnt: *const u8 = ptr::null();
         match unsafe { pcap_next_ex(self.pcap_,
                                     &mut packet_header_pnt,
                                     &mut ll_data_pnt) } {
@@ -94,7 +94,7 @@ impl Pcap {
     }
 
     pub fn send_packet<T: Copy>(&self, data: &T) -> Result<(), &str> {
-        let ll_data = data as *T as *u8;
+        let ll_data = data as *const T as *const u8;
         let ll_data_len = mem::size_of_val(data);
         match unsafe {
             pcap_sendpacket(self.pcap_, ll_data, ll_data_len as i32)

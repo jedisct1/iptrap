@@ -8,36 +8,36 @@ use std::{mem, ptr, str, slice};
 use std::fmt;
 
 /// The ZMQ container that manages all the sockets
-type Context_ = *c_void;
+type Context_ = *const c_void;
 
 /// A ZMQ socket
-type Socket_ = *c_void;
+type Socket_ = *const c_void;
 
 /// A message
 type Msg_ = [c_char, ..32];
 
 #[link(name = "zmq")]
 extern {
-    fn zmq_version(major: *c_int, minor: *c_int, patch: *c_int);
+    fn zmq_version(major: *const c_int, minor: *const c_int, patch: *const c_int);
 
     fn zmq_ctx_new() -> Context_;
     fn zmq_ctx_destroy(ctx: Context_) -> c_int;
 
     fn zmq_errno() -> c_int;
-    fn zmq_strerror(errnum: c_int) -> *c_char;
+    fn zmq_strerror(errnum: c_int) -> *const c_char;
 
     fn zmq_socket(ctx: Context_, typ: c_int) -> Socket_;
     fn zmq_close(socket: Socket_) -> c_int;
 
-    fn zmq_getsockopt(socket: Socket_, opt: c_int, optval: *c_void, size: *size_t) -> c_int;
-    fn zmq_setsockopt(socket: Socket_, opt: c_int, optval: *c_void, size: size_t) -> c_int;
+    fn zmq_getsockopt(socket: Socket_, opt: c_int, optval: *const c_void, size: *const size_t) -> c_int;
+    fn zmq_setsockopt(socket: Socket_, opt: c_int, optval: *const c_void, size: size_t) -> c_int;
 
-    fn zmq_bind(socket: Socket_, endpoint: *c_char) -> c_int;
-    fn zmq_connect(socket: Socket_, endpoint: *c_char) -> c_int;
+    fn zmq_bind(socket: Socket_, endpoint: *const c_char) -> c_int;
+    fn zmq_connect(socket: Socket_, endpoint: *const c_char) -> c_int;
 
     fn zmq_msg_init(msg: &Msg_) -> c_int;
     fn zmq_msg_init_size(msg: &Msg_, size: size_t) -> c_int;
-    fn zmq_msg_data(msg: &Msg_) -> *u8;
+    fn zmq_msg_data(msg: &Msg_) -> *const u8;
     fn zmq_msg_size(msg: &Msg_) -> size_t;
     fn zmq_msg_close(msg: &Msg_) -> c_int;
 
@@ -667,7 +667,7 @@ fn getsockopt_int(sock: Socket_, opt: c_int) -> Result<int, Error> {
         zmq_getsockopt(
             sock,
             opt as c_int,
-            &value as *c_int as *c_void,
+            &value as *const c_int as *const c_void,
             &size)
     };
 
@@ -682,7 +682,7 @@ fn getsockopt_u32(sock: Socket_, opt: c_int) -> Result<u32, Error> {
         zmq_getsockopt(
             sock,
             opt,
-            &value as *u32 as *c_void,
+            &value as *const u32 as *const c_void,
             &size)
     };
 
@@ -697,7 +697,7 @@ fn getsockopt_i64(sock: Socket_, opt: c_int) -> Result<i64, Error> {
         zmq_getsockopt(
             sock,
             opt as c_int,
-            &value as *i64 as *c_void,
+            &value as *const i64 as *const c_void,
             &size)
     };
 
@@ -712,7 +712,7 @@ fn getsockopt_u64(sock: Socket_, opt: c_int) -> Result<u64, Error> {
         zmq_getsockopt(
             sock,
             opt,
-            &value as *u64 as *c_void,
+            &value as *const u64 as *const c_void,
             &size)
     };
 
@@ -729,7 +729,7 @@ fn getsockopt_bytes(sock: Socket_, opt: c_int) -> Result<Vec<u8>, Error> {
         let r = zmq_getsockopt(
             sock,
             opt as c_int,
-            value.as_ptr() as *c_void,
+            value.as_ptr() as *const c_void,
             &size);
 
         if r == -1i32 {
@@ -747,7 +747,7 @@ fn setsockopt_int(sock: Socket_, opt: c_int, value: int) -> Result<(), Error> {
         zmq_setsockopt(
             sock,
             opt as c_int,
-            &value as *c_int as *c_void,
+            &value as *const c_int as *const c_void,
             mem::size_of::<c_int>() as size_t)
     };
 
@@ -759,7 +759,7 @@ fn setsockopt_i64(sock: Socket_, opt: c_int, value: i64) -> Result<(), Error> {
         zmq_setsockopt(
             sock,
             opt as c_int,
-            &value as *i64 as *c_void,
+            &value as *const i64 as *const c_void,
             mem::size_of::<i64>() as size_t)
     };
 
@@ -771,7 +771,7 @@ fn setsockopt_u64(sock: Socket_, opt: c_int, value: u64) -> Result<(), Error> {
         zmq_setsockopt(
             sock,
             opt as c_int,
-            &value as *u64 as *c_void,
+            &value as *const u64 as *const c_void,
             mem::size_of::<u64>() as size_t)
     };
 
@@ -783,7 +783,7 @@ fn setsockopt_bytes(sock: Socket_, opt: c_int, value: &[u8]) -> Result<(), Error
         let r = zmq_setsockopt(
             sock,
             opt as c_int,
-            value.as_ptr() as *c_void,
+            value.as_ptr() as *const c_void,
             value.len() as size_t
         );
 

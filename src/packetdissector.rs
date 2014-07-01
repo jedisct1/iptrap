@@ -59,9 +59,9 @@ impl PacketDissectorFilter {
 
 pub struct PacketDissector {
     pub ll_data: CVec<u8>,
-    pub etherhdr_ptr: *EtherHeader,
-    pub iphdr_ptr: *IpHeader,
-    pub tcphdr_ptr: *TcpHeader,
+    pub etherhdr_ptr: *const EtherHeader,
+    pub iphdr_ptr: *const IpHeader,
+    pub tcphdr_ptr: *const TcpHeader,
     pub tcp_data: CVec<u8>
 }
 
@@ -73,7 +73,7 @@ impl PacketDissector {
             return Err("Short ethernet frame");
         }
         let ll_data_ptr = ll_data.as_slice().as_ptr();
-        let etherhdr_ptr: *EtherHeader = ll_data_ptr as *EtherHeader;
+        let etherhdr_ptr: *const EtherHeader = ll_data_ptr as *const EtherHeader;
         let ref etherhdr = unsafe { *etherhdr_ptr };
         if etherhdr.ether_type != ETHERTYPE_IP.to_be() {
             return Err("Unsupported type of ethernet frame");
@@ -82,8 +82,8 @@ impl PacketDissector {
         if ll_data_len - iphdr_offset < size_of::<IpHeader>() {
             return Err("Short IP packet")
         }
-        let iphdr_ptr: *IpHeader = unsafe {
-            ll_data_ptr.offset(iphdr_offset as int) as *IpHeader
+        let iphdr_ptr: *const IpHeader = unsafe {
+            ll_data_ptr.offset(iphdr_offset as int) as *const IpHeader
         };
         let ref iphdr: IpHeader = unsafe { *iphdr_ptr };
         let iphdr_len = (iphdr.ip_vhl & 0xf) as uint * 4u;
@@ -105,8 +105,8 @@ impl PacketDissector {
         if ll_data_len - tcphdr_offset < size_of::<TcpHeader>() {
             return Err("Short TCP packet");
         }
-        let tcphdr_ptr: *TcpHeader = unsafe {
-            ll_data_ptr.offset(tcphdr_offset as int) as *TcpHeader
+        let tcphdr_ptr: *const TcpHeader = unsafe {
+            ll_data_ptr.offset(tcphdr_offset as int) as *const TcpHeader
         };
         let ref tcphdr: TcpHeader = unsafe { *tcphdr_ptr };        
         let tcphdr_data_offset = ((tcphdr.th_off_x2 >> 4) & 0xf) as uint * 4u;
