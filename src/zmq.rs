@@ -627,7 +627,7 @@ pub static POLLIN : i16 = 1i16;
 pub static POLLOUT : i16 = 2i16;
 pub static POLLERR : i16 = 4i16;
 
-#[allow(visible_private_types)]
+#[allow(visible_private_types,dead_code)]
 pub struct PollItem {
     socket: Socket_,
     fd: c_int,
