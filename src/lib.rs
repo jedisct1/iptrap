@@ -1,5 +1,5 @@
 
-#![crate_id = "iptrap"]
+#![crate_name = "iptrap"]
 #![crate_type = "lib"]
 #![feature(globs)]
 #![warn(non_camel_case_types,

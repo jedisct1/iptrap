@@ -25,7 +25,7 @@ RUST_OUT_DIR?=build
 #
 define RUST_CRATE
 
-$(1)_FILENAME=$$(shell $(RUSTC) --crate-file-name $(2))
+$(1)_FILENAME=$$(shell $(RUSTC) --print-file-name $(2))
 $(1)_DEPFILE=$$(RUST_OUT_DIR)/.$$($(1)_FILENAME).deps.mk
 $(1)_OUT=$$(RUST_OUT_DIR)/$$($(1)_FILENAME)
 $(1)_CLEAN=__rust_clean_$(1)_CLEAN
