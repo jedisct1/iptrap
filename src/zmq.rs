@@ -304,7 +304,7 @@ impl Drop for Socket {
     fn drop(&mut self) {
         match self.close_final() {
             Ok(()) => { debug!("socket dropped") },
-            Err(e) => fail!(e.to_str())
+            Err(e) => fail!(e.to_string())
         }
     }
 }

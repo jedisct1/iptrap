@@ -116,7 +116,7 @@ fn log_tcp_ack(zmq_ctx: &mut zmq::Socket, sk: cookie::SipHashKey,
                                                             ip_src[2], ip_src[3]).to_string()));
     record.insert("dport".to_string(), json::Number(dport as f64));
     record.insert("payload".to_string(), json::String(tcp_data_str.escape_default_except_lf().to_string()));
-    let json = record.to_json().to_str();
+    let json = record.to_json().to_string();
     let _ = zmq_ctx.send(json.as_bytes(), 0);
     info!("{}", json);
     true
