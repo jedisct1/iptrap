@@ -146,7 +146,7 @@ fn main() {
     if args.len() != 5 {
         return usage();
     }
-    let local_addr = match from_str::<IpAddr>(args.get(2).as_slice()) {
+    let local_addr = match from_str::<IpAddr>(args[2].as_slice()) {
         Some(local_ip) => local_ip,
         None => { return usage(); }
     };
@@ -154,8 +154,8 @@ fn main() {
         Ipv4Addr(a, b, c, d) => vec!(a, b, c, d),
         _ => fail!("Only IPv4 is supported for now")
     };
-    let pcap = Pcap::open_live(args.get(1).as_slice()).unwrap();
-    privilegesdrop::switch_user(from_str(args.get(3).as_slice()), from_str(args.get(4).as_slice()));
+    let pcap = Pcap::open_live(args[1].as_slice()).unwrap();
+    privilegesdrop::switch_user(from_str(args[3].as_slice()), from_str(args[4].as_slice()));
     match pcap.data_link_type() {
         DataLinkTypeEthernet => (),
         _ => fail!("Unsupported data link type")
