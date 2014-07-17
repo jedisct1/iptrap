@@ -106,7 +106,7 @@ fn log_tcp_ack(zmq_ctx: &mut zmq::Socket, sk: cookie::SipHashKey,
         }
     }
     let tcp_data_str =
-        std::str::from_utf8_lossy(dissector.tcp_data.as_slice()).into_string();
+        String::from_utf8_lossy(dissector.tcp_data.as_slice()).into_string();
     let ip_src = s_iphdr.ip_src;
     let dport = Int::from_be(s_tcphdr.th_dport);
     let mut record: HashMap<String, json::Json> = HashMap::with_capacity(4);
