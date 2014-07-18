@@ -615,7 +615,7 @@ impl Message {
     }
 
     pub fn to_bytes(&self) -> Vec<u8> {
-        self.with_bytes(|v| v.to_owned())
+        self.with_bytes(|v| v.to_vec())
     }
 
     pub fn to_str(&self) -> String {
@@ -736,7 +736,7 @@ fn getsockopt_bytes(sock: Socket_, opt: c_int) -> Result<Vec<u8>, Error> {
             Err(errno_to_error())
         } else {
             value.truncate(size as uint);
-            Ok(value.as_slice().to_owned())
+            Ok(value.as_slice().to_vec())
         }
     }
 }
