@@ -8,7 +8,7 @@ use libc::{c_void, c_char, c_int};
 use std::c_vec::CVec;
 use std::mem;
 use std::ptr;
-use std::str::raw::from_c_str;
+use std::string;
 
 pub static PCAP_ERRBUF_SIZE: uint = 256;
 
@@ -52,12 +52,11 @@ extern {
 
 impl Pcap {
     pub fn open_live(device: &str) -> Result<Pcap, String> {
-        let mut errbuf: Vec<c_char> = Vec::with_capacity(PCAP_ERRBUF_SIZE);
+        let errbuf = [0 as c_char, ..PCAP_ERRBUF_SIZE].as_mut_ptr();
         let device = unsafe { device.to_c_str().unwrap() };
-        let pcap = unsafe { pcap_open_live(device, 65536, 1,
-                                           500, errbuf.as_mut_ptr()) };
-        if pcap.is_null() {            
-            return Err(unsafe { from_c_str(errbuf.as_ptr()) });
+        let pcap = unsafe { pcap_open_live(device, 65536, 1, 500, errbuf) };
+        if pcap.is_null() {
+            return Err(unsafe { string::raw::from_buf(errbuf as *const u8) })
         }
         Ok(Pcap {
             pcap_: pcap
