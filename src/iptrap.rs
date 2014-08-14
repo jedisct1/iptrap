@@ -28,6 +28,7 @@ use std::collections::HashMap;
 use std::io::net::ip::{IpAddr, Ipv4Addr};
 use std::sync::atomics::{AtomicBool, Relaxed, INIT_ATOMIC_BOOL};
 use std::os;
+use std::time::Duration;
 
 pub mod zmq;
 
@@ -130,7 +131,7 @@ fn spawn_time_updater(time_needs_update: &'static mut AtomicBool) {
     spawn(proc() {
             loop {
                 time_needs_update.store(true, Relaxed);
-                std::io::timer::sleep(10 * 1_000);
+                std::io::timer::sleep(Duration::seconds(10));
             }
         });
 }
