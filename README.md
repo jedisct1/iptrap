@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/jedisct1/iptrap.png)](https://travis-ci.org/jedisct1/iptrap?branch=master)
+[![Build Status](https://travis-ci.org/jedisct1/iptrap.png?branch=master)](https://travis-ci.org/jedisct1/iptrap?branch=master)
 
 IPtrap 2
 ========
