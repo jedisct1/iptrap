@@ -7,6 +7,9 @@ authors = ["Frank Denis <github@pureftpd.org>"]
 [dependencies.zmq]
 git = "https://github.com/jedisct1/rust-zmq"
 
+[dependencies.capnp]
+git = "https://github.com/dwrensha/capnproto-rust"
+
 [lib]
 name = "iptrap"
 path = "src/lib.rs"
