@@ -1,7 +1,5 @@
 language: rust
 
-script: make
-
 before_script:
  - sudo apt-get install libpcap-dev
  - sudo apt-get install libzmq3-dev
