@@ -12,6 +12,7 @@ extern crate libc;
 extern crate serialize;
 extern crate sync;
 extern crate time;
+extern crate zmq;
 
 use iptrap::ETHERTYPE_IP;
 use iptrap::EmptyTcpPacket;
@@ -29,8 +30,6 @@ use std::io::net::ip::{IpAddr, Ipv4Addr};
 use std::sync::atomics::{AtomicBool, Relaxed, INIT_ATOMIC_BOOL};
 use std::os;
 use std::time::Duration;
-
-pub mod zmq;
 
 static STREAM_PORT: u16 = 9922;
 static SSH_PORT: u16 = 22;
