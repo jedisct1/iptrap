@@ -1,0 +1,9 @@
+
+[package]
+name = "iptrap"
+version = "0.0.1"
+authors = ["Frank Denis <github@pureftpd.org>"]
+
+[lib]
+name = "iptrap"
+path = "src/lib.rs"

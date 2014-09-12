@@ -10,3 +10,4 @@
 *.out
 *.app
 build
+target
