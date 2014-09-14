@@ -11,14 +11,14 @@ pub static TH_RST: u8 = 0x04;
 pub static TH_ACK: u8 = 0x10;
 pub static TH_PUSH: u8 = 0x08;
 
-#[packed]
+#[repr(packed)]
 pub struct EtherHeader {
     pub ether_dhost: [u8, ..6],
     pub ether_shost: [u8, ..6],
     pub ether_type: u16
 }
 
-#[packed]
+#[repr(packed)]
 pub struct IpHeader {
     pub ip_vhl: u8,
     pub ip_tos: u8,
@@ -32,7 +32,7 @@ pub struct IpHeader {
     pub ip_dst: [u8, ..4]
 }
 
-#[packed]
+#[repr(packed)]
 pub struct TcpHeader {
     pub th_sport: u16,
     pub th_dport: u16,

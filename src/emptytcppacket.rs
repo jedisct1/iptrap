@@ -4,7 +4,7 @@ use packetdissector::{ETHERTYPE_IP, IPPROTO_TCP};
 use std::mem::size_of;
 use std::rand;
 
-#[packed]
+#[repr(packed)]
 pub struct EmptyTcpPacket {
     pub etherhdr: EtherHeader,
     pub iphdr: IpHeader,
