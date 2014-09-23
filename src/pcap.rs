@@ -1,6 +1,4 @@
 
-#![allow(visible_private_types)]
-
 extern crate libc;
 
 use libc::types::os::common::posix01::timeval;
@@ -12,11 +10,11 @@ use std::string;
 
 pub static PCAP_ERRBUF_SIZE: uint = 256;
 
-type Pcap_ = *mut c_void;
+pub type Pcap_ = *mut c_void;
 
 #[allow(dead_code)]
 #[repr(C)]
-struct PacketHeader {
+pub struct PacketHeader {
     ts: timeval,
     caplen: u32,
     len: u32,
