@@ -8,7 +8,7 @@ use std::mem;
 use std::ptr;
 use std::string;
 
-pub static PCAP_ERRBUF_SIZE: uint = 256;
+pub const PCAP_ERRBUF_SIZE: uint = 256;
 
 pub type Pcap_ = *mut c_void;
 
