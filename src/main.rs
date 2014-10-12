@@ -125,7 +125,7 @@ fn usage() {
     println!("Usage: iptrap <device> <local ip address> <uid> <gid>");
 }
 
-fn spawn_time_updater(time_needs_update: &'static mut AtomicBool) {
+fn spawn_time_updater(time_needs_update: &'static AtomicBool) {
     spawn(proc() {
             loop {
                 time_needs_update.store(true, Relaxed);
@@ -175,8 +175,8 @@ fn main() {
     let mut zmq_socket = zmq_ctx.socket(zmq::PUB).unwrap();
     let _ = zmq_socket.set_linger(1);
     let _ = zmq_socket.bind(format!("tcp://0.0.0.0:{}", STREAM_PORT).as_slice());
-    static mut time_needs_update: AtomicBool = INIT_ATOMIC_BOOL;
-    unsafe { spawn_time_updater(&mut time_needs_update) };
+    static TIME_NEEDS_UPDATE: AtomicBool = INIT_ATOMIC_BOOL;
+    spawn_time_updater(&TIME_NEEDS_UPDATE);
     let mut ts = time::get_time().sec as u64 & !0x3f;
     let mut pkt_opt: Option<PcapPacket>;
     while { pkt_opt = pcap_arc.next_packet();
@@ -191,8 +191,8 @@ fn main() {
         if packet_should_be_bypassed(&dissector) {
             continue;
         }
-        if unsafe { time_needs_update.load(Relaxed) } != false {
-            unsafe { time_needs_update.store(false, Relaxed) };
+        if TIME_NEEDS_UPDATE.load(Relaxed) != false {
+            TIME_NEEDS_UPDATE.store(false, Relaxed);
             ts = time::get_time().sec as u64 & !0x3f;
         }
         let th_flags = unsafe { *dissector.tcphdr_ptr }.th_flags;
