@@ -98,7 +98,7 @@ impl PacketDissector {
         if iphdr.ip_p != IPPROTO_TCP {
             return Err("Unsupported IP protocol");
         }
-        if filter.local_ip.ne(&iphdr.ip_dst.into_vec()) {
+        if filter.local_ip.ne(&iphdr.ip_dst.to_vec()) {
             return Err("Packet destination is not the local IP");
         }
         let tcphdr_offset = iphdr_offset + iphdr_len;
