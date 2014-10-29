@@ -12,3 +12,4 @@ Dependencies:
 
 - libpcap-dev
 - libzmq3-dev
+- rust-nightly
