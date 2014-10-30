@@ -7,7 +7,7 @@ pub fn switch_user(uid: Option<uid_t>, gid: Option<gid_t>) {
     match gid {
         Some(gid) => {
             if unsafe { libc::setgid(gid) } != 0 {
-                fail!("setgid()");
+                panic!("setgid()");
             }
         }
         None => ()
@@ -19,7 +19,7 @@ pub fn switch_user(uid: Option<uid_t>, gid: Option<gid_t>) {
             }
             let _ = unsafe { setgroups(0, 0 as *const c_void) };
             if unsafe { libc::setuid(uid) } != 0 {
-                fail!("setuid()");
+                panic!("setuid()");
             }
         },
         None => ()

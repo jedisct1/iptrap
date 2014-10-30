@@ -151,13 +151,13 @@ fn main() {
     };
     let local_ip = match local_addr {
         Ipv4Addr(a, b, c, d) => vec!(a, b, c, d),
-        _ => fail!("Only IPv4 is supported for now")
+        _ => panic!("Only IPv4 is supported for now")
     };
     let pcap = Pcap::open_live(args[1].as_slice()).unwrap();
     privilegesdrop::switch_user(from_str(args[3].as_slice()), from_str(args[4].as_slice()));
     match pcap.data_link_type() {
         DataLinkTypeEthernet => (),
-        _ => fail!("Unsupported data link type")
+        _ => panic!("Unsupported data link type")
     }
     let sk = cookie::SipHashKey::new();
     let filter = PacketDissectorFilter::new(local_ip);

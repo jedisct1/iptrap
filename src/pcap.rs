@@ -66,7 +66,7 @@ impl Pcap {
         match unsafe { pcap_datalink(self.pcap_) } {
             0 => DataLinkTypeNull,
             1 => DataLinkTypeEthernet,
-            _ => fail!("Unsupported data link type")
+            _ => panic!("Unsupported data link type")
         }        
     }
 
