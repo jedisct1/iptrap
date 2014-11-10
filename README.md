@@ -14,6 +14,10 @@ Dependencies:
 - libzmq3-dev
 - rust-nightly
 
+Compilation:
+
+    cargo build --release
+
 Usage
 -----
 
