@@ -7,6 +7,9 @@ authors = ["Frank Denis <github@pureftpd.org>"]
 [dependencies.zmq]
 git = "https://github.com/jedisct1/rust-zmq"
 
+[dependencies.time]
+git = "https://github.com/rust-lang/time"
+
 [lib]
 name = "iptrap"
 path = "src/lib.rs"
