@@ -2,6 +2,7 @@
 use packetdissector::{IpHeader, TcpHeader};
 use std::c_vec::CVec;
 use std::iter;
+use std::num::Int;
 use std::mem::size_of_val;
 
 pub fn ip_header(iphdr: &mut IpHeader) {

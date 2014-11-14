@@ -3,6 +3,7 @@ extern crate std;
 
 use std::c_vec::CVec;
 use std::mem::size_of;
+use std::num::Int;
 
 pub static ETHERTYPE_IP: u16 = 0x0800;
 pub static IPPROTO_TCP: u8 = 6;
