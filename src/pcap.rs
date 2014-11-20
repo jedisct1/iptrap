@@ -30,8 +30,8 @@ pub struct Pcap {
 }
 
 pub enum DataLinkType {
-    DataLinkTypeNull = 0,
-    DataLinkTypeEthernet = 1
+    Null = 0,
+    Ethernet = 1
 }
 
 #[link(name = "pcap")]
@@ -64,8 +64,8 @@ impl Pcap {
 
     pub fn data_link_type(&self) -> DataLinkType {
         match unsafe { pcap_datalink(self.pcap_) } {
-            0 => DataLinkTypeNull,
-            1 => DataLinkTypeEthernet,
+            0 => DataLinkType::Null,
+            1 => DataLinkType::Ethernet,
             _ => panic!("Unsupported data link type")
         }        
     }
