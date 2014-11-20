@@ -19,7 +19,7 @@ use iptrap::privilegesdrop;
 use iptrap::strsliceescape::StrSliceEscape;
 use iptrap::{EtherHeader, IpHeader, TcpHeader};
 use iptrap::{PacketDissector, PacketDissectorFilter};
-use iptrap::{Pcap, PcapPacket, DataLinkTypeEthernet};
+use iptrap::{Pcap, PcapPacket, DataLinkType};
 use iptrap::{TH_SYN, TH_ACK, TH_RST};
 use iptrap::{checksum, cookie};
 use serialize::json::ToJson;
@@ -157,7 +157,7 @@ fn main() {
     let pcap = Pcap::open_live(args[1].as_slice()).unwrap();
     privilegesdrop::switch_user(from_str(args[3].as_slice()), from_str(args[4].as_slice()));
     match pcap.data_link_type() {
-        DataLinkTypeEthernet => (),
+        DataLinkType::Ethernet => (),
         _ => panic!("Unsupported data link type")
     }
     let sk = cookie::SipHashKey::new();
