@@ -64,8 +64,8 @@ impl Pcap {
 
     pub fn data_link_type(&self) -> DataLinkType {
         match unsafe { pcap_datalink(self.pcap_) } {
-            0 => Null,
-            1 => Ethernet,
+            0 => DataLinkType::Null,
+            1 => DataLinkType::Ethernet,
             _ => panic!("Unsupported data link type")
         }        
     }
