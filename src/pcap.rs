@@ -51,7 +51,7 @@ extern {
 impl Pcap {
     pub fn open_live(device: &str) -> Result<Pcap, String> {
         let errbuf = [0 as c_char, ..PCAP_ERRBUF_SIZE].as_mut_ptr();
-        let device = unsafe { device.to_c_str().unwrap() };
+        let device = unsafe { device.to_c_str().into_inner() };
         let pcap = unsafe { pcap_open_live(device, 65536, 1, 500, errbuf) };
         if pcap.is_null() {
             return Err(unsafe { String::from_raw_buf(errbuf as *const u8) })
