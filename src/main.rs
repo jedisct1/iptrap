@@ -9,7 +9,6 @@
 extern crate iptrap;
 extern crate libc;
 extern crate serialize;
-extern crate sync;
 extern crate time;
 extern crate zmq;
 
@@ -26,6 +25,7 @@ use serialize::json::ToJson;
 use serialize::json;
 use std::collections::HashMap;
 use std::io::net::ip::{IpAddr, Ipv4Addr};
+use std::sync;
 use std::sync::atomic::{AtomicBool, Relaxed, INIT_ATOMIC_BOOL};
 use std::num::Int;
 use std::os;
