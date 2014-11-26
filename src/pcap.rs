@@ -6,7 +6,6 @@ use libc::{c_void, c_char, c_int};
 use std::c_vec::CVec;
 use std::mem;
 use std::ptr;
-use std::string;
 
 pub const PCAP_ERRBUF_SIZE: uint = 256;
 
@@ -55,7 +54,7 @@ impl Pcap {
         let device = unsafe { device.to_c_str().unwrap() };
         let pcap = unsafe { pcap_open_live(device, 65536, 1, 500, errbuf) };
         if pcap.is_null() {
-            return Err(unsafe { string::raw::from_buf(errbuf as *const u8) })
+            return Err(unsafe { String::from_raw_buf(errbuf as *const u8) })
         }
         Ok(Pcap {
             pcap_: pcap
