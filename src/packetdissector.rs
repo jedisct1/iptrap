@@ -19,6 +19,8 @@ pub struct EtherHeader {
     pub ether_type: u16
 }
 
+impl Copy for EtherHeader { }
+
 #[repr(packed)]
 pub struct IpHeader {
     pub ip_vhl: u8,
@@ -33,6 +35,8 @@ pub struct IpHeader {
     pub ip_dst: [u8, ..4]
 }
 
+impl Copy for IpHeader { }
+
 #[repr(packed)]
 pub struct TcpHeader {
     pub th_sport: u16,
@@ -45,6 +49,8 @@ pub struct TcpHeader {
     pub th_sum: u16,
     pub th_urp: u16
 }
+
+impl Copy for TcpHeader { }
 
 pub struct PacketDissectorFilter {
     local_ip: Vec<u8>

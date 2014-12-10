@@ -20,6 +20,8 @@ pub struct PacketHeader {
     comment: [u8, ..256]
 }
 
+impl Copy for PacketHeader { }
+
 pub struct PcapPacket {
     pub ll_data: CVec<u8>
 }
@@ -32,6 +34,8 @@ pub enum DataLinkType {
     Null = 0,
     Ethernet = 1
 }
+
+impl Copy for DataLinkType { }
 
 #[link(name = "pcap")]
 extern {

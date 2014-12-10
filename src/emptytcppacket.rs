@@ -13,6 +13,8 @@ pub struct EmptyTcpPacket {
     pub tcpoptions: [u8, ..4]
 }
 
+impl Copy for EmptyTcpPacket { }
+
 impl EmptyTcpPacket {
     pub fn new() -> EmptyTcpPacket {
         let etherhdr = EtherHeader {

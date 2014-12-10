@@ -8,6 +8,8 @@ pub struct SipHashKey {
     k2: u64
 }
 
+impl Copy for SipHashKey { }
+
 impl SipHashKey {
     pub fn new() -> SipHashKey {
         SipHashKey {
