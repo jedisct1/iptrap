@@ -126,7 +126,7 @@ fn usage() {
 }
 
 fn spawn_time_updater(time_needs_update: &'static AtomicBool) {
-    spawn(proc() {
+    spawn(move || {
             loop {
                 time_needs_update.store(true, Relaxed);
                 std::io::timer::sleep(Duration::seconds(10));
@@ -165,7 +165,7 @@ fn main() {
     let (packetwriter_chan, packetwriter_port):
         (Sender<EmptyTcpPacket>, Receiver<EmptyTcpPacket>) = channel();
     let pcap_arc0 = pcap_arc.clone();
-    spawn(proc() {
+    spawn(move || {
             loop {
                 let pkt = packetwriter_port.recv();
                 let _ = pcap_arc0.send_packet(&pkt);
