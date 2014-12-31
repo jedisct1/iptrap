@@ -12,7 +12,7 @@ repository = "https://github.com/jedisct1/iptrap"
 git = "https://github.com/jedisct1/rust-zmq"
 
 [dependencies.time]
-time = "~0.1.1"
+time = "~0.1.3"
 
 [lib]
 name = "iptrap"
