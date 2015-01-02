@@ -28,6 +28,7 @@ use std::sync;
 use std::sync::atomic::{AtomicBool, Relaxed, INIT_ATOMIC_BOOL};
 use std::num::Int;
 use std::os;
+use std::thread::Thread;
 use std::time::Duration;
 
 static STREAM_PORT: u16 = 9922;
@@ -105,7 +106,7 @@ fn log_tcp_ack(zmq_ctx: &mut zmq::Socket, sk: cookie::SipHashKey,
         }
     }
     let tcp_data_str =
-        String::from_utf8_lossy(dissector.tcp_data.as_slice()).into_string();
+        String::from_utf8_lossy(dissector.tcp_data.as_slice()).into_owned();
     let ip_src = s_iphdr.ip_src;
     let dport = Int::from_be(s_tcphdr.th_dport);
     let mut record: HashMap<String, Json> = HashMap::with_capacity(4);
@@ -125,13 +126,15 @@ fn usage() {
     println!("Usage: iptrap <device> <local ip address> <uid> <gid>");
 }
 
+#[allow(unreachable_code)]
 fn spawn_time_updater(time_needs_update: &'static AtomicBool) {
-    spawn(move || {
+    Thread::spawn(move || {
             loop {
                 time_needs_update.store(true, Relaxed);
                 std::io::timer::sleep(Duration::seconds(10));
             }
-        });
+            ()
+        }).detach();
 }
 
 fn packet_should_be_bypassed(dissector: &PacketDissector) -> bool {
@@ -140,12 +143,13 @@ fn packet_should_be_bypassed(dissector: &PacketDissector) -> bool {
     th_dport == WSD_PORT.to_be()
 }
 
+#[allow(unreachable_code)]
 fn main() {
     let args = os::args();
     if args.len() != 5 {
         return usage();
     }
-    let local_addr = match from_str::<IpAddr>(args[2].as_slice()) {
+    let local_addr: IpAddr = match args[2].parse() {
         Some(local_ip) => local_ip,
         None => { return usage(); }
     };
@@ -154,7 +158,7 @@ fn main() {
         _ => panic!("Only IPv4 is supported for now")
     };
     let pcap = Pcap::open_live(args[1].as_slice()).unwrap();
-    privilegesdrop::switch_user(from_str(args[3].as_slice()), from_str(args[4].as_slice()));
+    privilegesdrop::switch_user(args[3].parse(), args[4].parse());
     match pcap.data_link_type() {
         DataLinkType::Ethernet => (),
         _ => panic!("Unsupported data link type")
@@ -165,12 +169,13 @@ fn main() {
     let (packetwriter_chan, packetwriter_port):
         (Sender<EmptyTcpPacket>, Receiver<EmptyTcpPacket>) = channel();
     let pcap_arc0 = pcap_arc.clone();
-    spawn(move || {
+    Thread::spawn(move || {
             loop {
                 let pkt = packetwriter_port.recv();
                 let _ = pcap_arc0.send_packet(&pkt);
             }
-        });
+            ()
+        }).detach();
     let mut zmq_ctx = zmq::Context::new();
     let mut zmq_socket = zmq_ctx.socket(zmq::SocketType::PUB).unwrap();
     let _ = zmq_socket.set_linger(1);

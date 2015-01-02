@@ -115,7 +115,7 @@ impl PacketDissector {
         let tcphdr_ptr: *const TcpHeader = unsafe {
             ll_data_ptr.offset(tcphdr_offset as int) as *const TcpHeader
         };
-        let ref tcphdr: TcpHeader = unsafe { *tcphdr_ptr };        
+        let ref tcphdr: TcpHeader = unsafe { *tcphdr_ptr };
         let tcphdr_data_offset = ((tcphdr.th_off_x2 >> 4) & 0xf) as uint * 4u;
         if tcphdr_data_offset < size_of::<TcpHeader>() {
             return Err("Short TCP data offset");
@@ -145,5 +145,5 @@ impl PacketDissector {
                 tcphdr_ptr: tcphdr_ptr,
                 tcp_data: tcp_data
             })
-    }    
+    }
 }

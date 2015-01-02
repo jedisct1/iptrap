@@ -23,5 +23,5 @@ pub fn switch_user(uid: Option<uid_t>, gid: Option<gid_t>) {
             }
         },
         None => ()
-    }    
+    }
 }

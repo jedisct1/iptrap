@@ -26,8 +26,11 @@ pub struct PcapPacket {
     pub ll_data: CVec<u8>
 }
 
+unsafe impl Send for Pcap { }
+unsafe impl Sync for Pcap { }
+
 pub struct Pcap {
-    pcap_: Pcap_ 
+    pcap_: Pcap_
 }
 
 pub enum DataLinkType {
@@ -70,7 +73,7 @@ impl Pcap {
             0 => DataLinkType::Null,
             1 => DataLinkType::Ethernet,
             _ => panic!("Unsupported data link type")
-        }        
+        }
     }
 
     pub fn next_packet(&self) -> Option<PcapPacket> {
