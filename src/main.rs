@@ -134,7 +134,7 @@ fn spawn_time_updater(time_needs_update: &'static AtomicBool) {
                 std::io::timer::sleep(Duration::seconds(10));
             }
             ()
-        }).detach();
+        });
 }
 
 fn packet_should_be_bypassed(dissector: &PacketDissector) -> bool {
@@ -175,7 +175,7 @@ fn main() {
                 let _ = pcap_arc0.send_packet(&pkt);
             }
             ()
-        }).detach();
+        });
     let mut zmq_ctx = zmq::Context::new();
     let mut zmq_socket = zmq_ctx.socket(zmq::SocketType::PUB).unwrap();
     let _ = zmq_socket.set_linger(1);
