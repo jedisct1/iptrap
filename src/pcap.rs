@@ -17,7 +17,7 @@ pub struct PacketHeader {
     ts: timeval,
     caplen: u32,
     len: u32,
-    comment: [u8, ..256]
+    comment: [u8; 256]
 }
 
 impl Copy for PacketHeader { }
@@ -57,7 +57,7 @@ extern {
 
 impl Pcap {
     pub fn open_live(device: &str) -> Result<Pcap, String> {
-        let errbuf = [0 as c_char, ..PCAP_ERRBUF_SIZE].as_mut_ptr();
+        let errbuf = [0 as c_char; PCAP_ERRBUF_SIZE].as_mut_ptr();
         let device = unsafe { device.to_c_str().into_inner() };
         let pcap = unsafe { pcap_open_live(device, 65536, 1, 500, errbuf) };
         if pcap.is_null() {

@@ -14,8 +14,8 @@ pub static TH_PUSH: u8 = 0x08;
 
 #[repr(packed)]
 pub struct EtherHeader {
-    pub ether_dhost: [u8, ..6],
-    pub ether_shost: [u8, ..6],
+    pub ether_dhost: [u8; 6],
+    pub ether_shost: [u8; 6],
     pub ether_type: u16
 }
 
@@ -31,8 +31,8 @@ pub struct IpHeader {
     pub ip_ttl: u8,
     pub ip_p: u8,
     pub ip_sum: u16,
-    pub ip_src: [u8, ..4],
-    pub ip_dst: [u8, ..4]
+    pub ip_src: [u8; 4],
+    pub ip_dst: [u8; 4]
 }
 
 impl Copy for IpHeader { }

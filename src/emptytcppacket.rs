@@ -10,7 +10,7 @@ pub struct EmptyTcpPacket {
     pub etherhdr: EtherHeader,
     pub iphdr: IpHeader,
     pub tcphdr: TcpHeader,
-    pub tcpoptions: [u8, ..4]
+    pub tcpoptions: [u8; 4]
 }
 
 impl Copy for EmptyTcpPacket { }
@@ -18,8 +18,8 @@ impl Copy for EmptyTcpPacket { }
 impl EmptyTcpPacket {
     pub fn new() -> EmptyTcpPacket {
         let etherhdr = EtherHeader {
-            ether_dhost: [0u8, ..6],
-            ether_shost: [0u8, ..6],
+            ether_dhost: [0u8; 6],
+            ether_shost: [0u8; 6],
             ether_type: ETHERTYPE_IP.to_be()
         };
         let tcpoptions = [ 0x2u8, 0x4u8, 0x5u8, 0xb4u8 ];
@@ -34,8 +34,8 @@ impl EmptyTcpPacket {
             ip_ttl: 42u8,
             ip_p: IPPROTO_TCP,
             ip_sum: 0u16,
-            ip_src: [0u8, ..4],
-            ip_dst: [0u8, ..4]
+            ip_src: [0u8; 4],
+            ip_dst: [0u8; 4]
         };
         assert!(tcpoptions.len() % 4 == 0);
         let tcphdr = TcpHeader {
@@ -44,7 +44,7 @@ impl EmptyTcpPacket {
             th_seq: 0u32,
             th_ack: 0u32,
             th_off_x2: ((size_of::<TcpHeader>() +
-                         tcpoptions.len()) / 4) as u8 << 4,
+                         (tcpoptions.len()) / 4) as u8) << 4,
             th_flags: 0u8,
             th_win: 65535u16,
             th_sum: 0u16,

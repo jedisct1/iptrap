@@ -11,7 +11,7 @@ pub fn ip_header(iphdr: &mut IpHeader) {
     let iphdr_v = unsafe { CVec::new(iphdr_ptr as *mut u8, iphdr_len) };
     let mut sum: u64 = iter::range_step(0u, iphdr_len, 2u).
         fold(0u64, |sum, i|
-             sum + ((*iphdr_v.get(i).unwrap() as u16 << 8) |
+             sum + (((*iphdr_v.get(i).unwrap() as u16) << 8) |
                     *iphdr_v.get(i + 1).unwrap() as u16) as u64);
     while (sum >> 16) != 0 {
         sum = (sum & 0xffff) + (sum >> 16);
@@ -26,17 +26,17 @@ pub fn tcp_header(iphdr: &IpHeader, tcphdr: &mut TcpHeader) {
     let mut sum0: u64;
     sum0  = tcphdr_len as u64;
     sum0 += iphdr.ip_p as u64;
-    sum0 += (iphdr.ip_src[0] as u16 << 8 | iphdr.ip_src[1] as u16) as u64;
-    sum0 += (iphdr.ip_src[2] as u16 << 8 | iphdr.ip_src[3] as u16) as u64;
-    sum0 += (iphdr.ip_dst[0] as u16 << 8 | iphdr.ip_dst[1] as u16) as u64;
-    sum0 += (iphdr.ip_dst[2] as u16 << 8 | iphdr.ip_dst[3] as u16) as u64;
+    sum0 += ((iphdr.ip_src[0] as u16) << 8 | iphdr.ip_src[1] as u16) as u64;
+    sum0 += ((iphdr.ip_src[2] as u16) << 8 | iphdr.ip_src[3] as u16) as u64;
+    sum0 += ((iphdr.ip_dst[0] as u16) << 8 | iphdr.ip_dst[1] as u16) as u64;
+    sum0 += ((iphdr.ip_dst[2] as u16) << 8 | iphdr.ip_dst[3] as u16) as u64;
     let tcphdr_ptr: *const u8 = tcphdr as *mut TcpHeader as *const u8;
     let tcphdr_v = unsafe {
         CVec::new(tcphdr_ptr as *mut u8, tcphdr_len)
     };
     let mut sum: u64 = iter::range_step(0u, tcphdr_len, 2u).
         fold(sum0, |sum, i|
-             sum + ((*tcphdr_v.get(i).unwrap() as u16 << 8) |
+             sum + (((*tcphdr_v.get(i).unwrap() as u16) << 8) |
                     *tcphdr_v.get(i + 1).unwrap() as u16) as u64);
     while (sum >> 16) != 0 {
         sum = (sum & 0xffff) + (sum >> 16);
