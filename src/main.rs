@@ -2,7 +2,7 @@
 #![warn(non_camel_case_types,
         non_upper_case_globals,
         unused_qualifications)]
-
+#![allow(unstable)]
 #[macro_use] extern crate log;
 
 extern crate iptrap;
@@ -82,7 +82,7 @@ fn send_tcp_rst(chan: &Sender<EmptyTcpPacket>, dissector: &PacketDissector) {
     rst_packet.tcphdr.th_flags = TH_RST | TH_ACK;
     checksum::tcp_header(&rst_packet.iphdr, &mut rst_packet.tcphdr);
 
-    chan.send(rst_packet);
+    let _ = chan.send(rst_packet);
 }
 
 fn log_tcp_ack(zmq_ctx: &mut zmq::Socket, sk: cookie::SipHashKey,
