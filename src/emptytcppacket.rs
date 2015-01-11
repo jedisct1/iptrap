@@ -43,8 +43,8 @@ impl EmptyTcpPacket {
             th_dport: 0u16,
             th_seq: 0u32,
             th_ack: 0u32,
-            th_off_x2: ((size_of::<TcpHeader>() +
-                         (tcpoptions.len()) / 4) as u8) << 4,
+            th_off_x2: (((size_of::<TcpHeader>() +
+                          tcpoptions.len()) / 4) as u8) << 4,
             th_flags: 0u8,
             th_win: 65535u16,
             th_sum: 0u16,
