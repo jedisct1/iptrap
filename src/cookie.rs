@@ -1,6 +1,5 @@
 
-use std::hash::sip;
-use std::hash::Hash;
+use std::hash::{Hash, Hasher, SipHasher};
 use std::rand;
 
 pub struct SipHashKey {
@@ -19,7 +18,7 @@ impl SipHashKey {
     }
 }
 
-#[deriving(Hash)]
+#[derive(Hash)]
 struct CookieInput {
     ip_src: [u8; 4],
     ip_dst: [u8; 4],
@@ -38,5 +37,7 @@ pub fn tcp(ip_src: [u8; 4], ip_dst: [u8; 4], th_sport: u16, th_dport: u16,
         th_dport: th_dport,
         uts: uts
     };
-    sip::hash_with_keys(sk.k1, sk.k2, &input) as u32
+    let sip = &mut SipHasher::new_with_keys(sk.k1, sk.k2);
+    input.hash(sip);
+    sip.finish() as u32
 }

@@ -5,6 +5,8 @@
         non_upper_case_globals,
         unused_qualifications)]
 
+#![feature(int_uint)]
+
 extern crate libc;
 
 pub use emptytcppacket::*;

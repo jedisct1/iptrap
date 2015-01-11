@@ -3,9 +3,10 @@ extern crate libc;
 
 use libc::types::os::common::posix01::timeval;
 use libc::{c_void, c_char, c_int};
-use std::c_vec::CVec;
+use std::ffi;
 use std::mem;
 use std::ptr;
+use std::str;
 
 pub const PCAP_ERRBUF_SIZE: uint = 256;
 
@@ -23,7 +24,7 @@ pub struct PacketHeader {
 impl Copy for PacketHeader { }
 
 pub struct PcapPacket {
-    pub ll_data: CVec<u8>
+    pub ll_data: Vec<u8>
 }
 
 unsafe impl Send for Pcap { }
@@ -57,11 +58,12 @@ extern {
 
 impl Pcap {
     pub fn open_live(device: &str) -> Result<Pcap, String> {
-        let errbuf = [0 as c_char; PCAP_ERRBUF_SIZE].as_mut_ptr();
-        let device = unsafe { device.to_c_str().into_inner() };
+        let errbuf = [0 as c_char; PCAP_ERRBUF_SIZE].as_mut_ptr() as *mut libc::c_char;
+        let device = unsafe { ffi::CString::from_slice(device.as_bytes()).as_ptr() };
         let pcap = unsafe { pcap_open_live(device, 65536, 1, 500, errbuf) };
         if pcap.is_null() {
-            return Err(unsafe { String::from_raw_buf(errbuf as *const u8) })
+            return Err(unsafe { str::from_utf8(ffi::c_str_to_bytes(&(errbuf as *const libc::c_char))).
+                                unwrap() }.to_string())
         }
         Ok(Pcap {
             pcap_: pcap
@@ -87,7 +89,7 @@ impl Pcap {
                 let packet_header = unsafe { *packet_header_pnt };
                 let ll_data_len = packet_header.caplen as uint;
                 let ll_data = unsafe {
-                    CVec::new(ll_data_pnt as *mut u8, ll_data_len)
+                    Vec::from_raw_buf(ll_data_pnt as *mut u8, ll_data_len)
                 };
                 Some(PcapPacket {
                         ll_data: ll_data

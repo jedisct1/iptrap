@@ -3,8 +3,7 @@
         non_upper_case_globals,
         unused_qualifications)]
 
-#![feature(phase)]
-#[phase(plugin, link)] extern crate log;
+#[macro_use] extern crate log;
 
 extern crate iptrap;
 extern crate libc;
@@ -24,8 +23,10 @@ use iptrap::{checksum, cookie};
 use serialize::json::{ToJson,Json};
 use std::collections::HashMap;
 use std::io::net::ip::{IpAddr, Ipv4Addr};
-use std::sync;
-use std::sync::atomic::{AtomicBool, Relaxed, INIT_ATOMIC_BOOL};
+use std::sync::mpsc::{channel, Sender, Receiver};
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, ATOMIC_BOOL_INIT};
+use std::sync::atomic::Ordering::Relaxed;
 use std::num::Int;
 use std::os;
 use std::thread::Thread;
@@ -59,7 +60,7 @@ fn send_tcp_synack(sk: cookie::SipHashKey, chan: &Sender<EmptyTcpPacket>,
                     sk, ts);
     checksum::tcp_header(&sa_packet.iphdr, &mut sa_packet.tcphdr);
 
-    chan.send(sa_packet);
+    let _ = chan.send(sa_packet);
 }
 
 fn send_tcp_rst(chan: &Sender<EmptyTcpPacket>, dissector: &PacketDissector) {
@@ -165,7 +166,7 @@ fn main() {
     }
     let sk = cookie::SipHashKey::new();
     let filter = PacketDissectorFilter::new(local_ip);
-    let pcap_arc = sync::Arc::new(pcap);
+    let pcap_arc = Arc::new(pcap);
     let (packetwriter_chan, packetwriter_port):
         (Sender<EmptyTcpPacket>, Receiver<EmptyTcpPacket>) = channel();
     let pcap_arc0 = pcap_arc.clone();
@@ -180,7 +181,7 @@ fn main() {
     let mut zmq_socket = zmq_ctx.socket(zmq::SocketType::PUB).unwrap();
     let _ = zmq_socket.set_linger(1);
     let _ = zmq_socket.bind(format!("tcp://0.0.0.0:{}", STREAM_PORT).as_slice());
-    static TIME_NEEDS_UPDATE: AtomicBool = INIT_ATOMIC_BOOL;
+    static TIME_NEEDS_UPDATE: AtomicBool = ATOMIC_BOOL_INIT;
     spawn_time_updater(&TIME_NEEDS_UPDATE);
     let mut ts = time::get_time().sec as u64 & !0x3f;
     let mut pkt_opt: Option<PcapPacket>;

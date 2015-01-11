@@ -1,7 +1,6 @@
 
 extern crate std;
 
-use std::c_vec::CVec;
 use std::mem::size_of;
 use std::num::Int;
 
@@ -65,16 +64,16 @@ impl PacketDissectorFilter {
 }
 
 pub struct PacketDissector {
-    pub ll_data: CVec<u8>,
+    pub ll_data: Vec<u8>,
     pub etherhdr_ptr: *const EtherHeader,
     pub iphdr_ptr: *const IpHeader,
     pub tcphdr_ptr: *const TcpHeader,
-    pub tcp_data: CVec<u8>
+    pub tcp_data: Vec<u8>
 }
 
 impl PacketDissector {
     pub fn new(filter: &PacketDissectorFilter,
-               ll_data: CVec<u8>) -> Result<PacketDissector, &str> {
+               ll_data: Vec<u8>) -> Result<PacketDissector, &str> {
         let ll_data_len = ll_data.len();
         if ll_data_len < size_of::<EtherHeader>() {
             return Err("Short ethernet frame");
@@ -136,7 +135,7 @@ impl PacketDissector {
             ll_data_ptr.offset(tcp_data_offset as int)
         };
         let tcp_data = unsafe {
-            CVec::new(tcp_data_ptr as *mut u8, tcp_data_len)
+            Vec::from_raw_buf(tcp_data_ptr as *mut u8, tcp_data_len)
         };
         Ok(PacketDissector {
                 ll_data: ll_data,
