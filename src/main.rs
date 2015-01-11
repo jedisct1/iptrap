@@ -7,7 +7,7 @@
 
 extern crate iptrap;
 extern crate libc;
-extern crate serialize;
+extern crate "rustc-serialize" as rustc_serialize;
 extern crate time;
 extern crate zmq;
 
@@ -20,7 +20,7 @@ use iptrap::{PacketDissector, PacketDissectorFilter};
 use iptrap::{Pcap, PcapPacket, DataLinkType};
 use iptrap::{TH_SYN, TH_ACK, TH_RST};
 use iptrap::{checksum, cookie};
-use serialize::json::{ToJson,Json};
+use rustc_serialize::json::{ToJson,Json};
 use std::collections::HashMap;
 use std::io::net::ip::{IpAddr, Ipv4Addr};
 use std::sync::mpsc::{channel, Sender, Receiver};

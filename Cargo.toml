@@ -14,6 +14,9 @@ git = "https://github.com/jedisct1/rust-zmq"
 [dependencies.time]
 time = "*"
 
+[dependencies]
+rustc-serialize = "*"
+
 [lib]
 name = "iptrap"
 path = "src/lib.rs"
