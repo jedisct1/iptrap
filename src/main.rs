@@ -172,7 +172,7 @@ fn main() {
     let pcap_arc0 = pcap_arc.clone();
     Thread::spawn(move || {
             loop {
-                let pkt = packetwriter_port.recv();
+                let pkt = packetwriter_port.recv().unwrap();
                 let _ = pcap_arc0.send_packet(&pkt);
             }
             ()
