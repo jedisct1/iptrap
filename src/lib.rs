@@ -6,8 +6,6 @@
         unused_qualifications)]
 #![allow(unstable)]
 
-#![feature(int_uint)]
-
 extern crate libc;
 
 pub use emptytcppacket::*;

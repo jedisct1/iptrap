@@ -84,15 +84,15 @@ impl PacketDissector {
         if etherhdr.ether_type != ETHERTYPE_IP.to_be() {
             return Err("Unsupported type of ethernet frame");
         }
-        let iphdr_offset: uint = size_of::<EtherHeader>();
+        let iphdr_offset: usize = size_of::<EtherHeader>();
         if ll_data_len - iphdr_offset < size_of::<IpHeader>() {
             return Err("Short IP packet")
         }
         let iphdr_ptr: *const IpHeader = unsafe {
-            ll_data_ptr.offset(iphdr_offset as int) as *const IpHeader
+            ll_data_ptr.offset(iphdr_offset as isize) as *const IpHeader
         };
         let ref iphdr: IpHeader = unsafe { *iphdr_ptr };
-        let iphdr_len = (iphdr.ip_vhl & 0xf) as uint * 4u;
+        let iphdr_len = (iphdr.ip_vhl & 0xf) as usize * 4;
         if iphdr_len < size_of::<IpHeader>() ||
             ll_data_len - iphdr_offset < iphdr_len {
             return Err("Short IP packet")
@@ -112,10 +112,10 @@ impl PacketDissector {
             return Err("Short TCP packet");
         }
         let tcphdr_ptr: *const TcpHeader = unsafe {
-            ll_data_ptr.offset(tcphdr_offset as int) as *const TcpHeader
+            ll_data_ptr.offset(tcphdr_offset as isize) as *const TcpHeader
         };
         let ref tcphdr: TcpHeader = unsafe { *tcphdr_ptr };
-        let tcphdr_data_offset = ((tcphdr.th_off_x2 >> 4) & 0xf) as uint * 4u;
+        let tcphdr_data_offset = ((tcphdr.th_off_x2 >> 4) & 0xf) as usize * 4;
         if tcphdr_data_offset < size_of::<TcpHeader>() {
             return Err("Short TCP data offset");
         }
@@ -124,7 +124,7 @@ impl PacketDissector {
         }
         let tcp_data_offset = tcphdr_offset + tcphdr_data_offset;
 
-        let ip_len = Int::from_be(iphdr.ip_len) as uint;
+        let ip_len = Int::from_be(iphdr.ip_len) as usize;
         if ip_len < tcp_data_offset - tcp_data_offset {
             return Err("Truncated TCP packet - truncated data");
         }
@@ -132,7 +132,7 @@ impl PacketDissector {
         let max_tcp_data_len = ll_data_len - tcp_data_offset;
         let tcp_data_len = std::cmp::min(real_tcp_data_len, max_tcp_data_len);
         let tcp_data_ptr = unsafe {
-            ll_data_ptr.offset(tcp_data_offset as int)
+            ll_data_ptr.offset(tcp_data_offset as isize)
         };
         let tcp_data = unsafe {
             Vec::from_raw_buf(tcp_data_ptr as *mut u8, tcp_data_len)

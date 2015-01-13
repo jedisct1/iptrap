@@ -8,7 +8,7 @@ use std::mem;
 use std::ptr;
 use std::str;
 
-pub const PCAP_ERRBUF_SIZE: uint = 256;
+pub const PCAP_ERRBUF_SIZE: usize = 256;
 
 pub type Pcap_ = *mut c_void;
 
@@ -87,7 +87,7 @@ impl Pcap {
             0 => self.next_packet(),
             1 => {
                 let packet_header = unsafe { *packet_header_pnt };
-                let ll_data_len = packet_header.caplen as uint;
+                let ll_data_len = packet_header.caplen as usize;
                 let ll_data = unsafe {
                     Vec::from_raw_buf(ll_data_pnt as *mut u8, ll_data_len)
                 };
