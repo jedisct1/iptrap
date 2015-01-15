@@ -1,0 +1,3 @@
+[submodule "rust-zmq"]
+	path = rust-zmq
+	url = https://github.com/jedisct1/rust-zmq
