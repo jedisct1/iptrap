@@ -16,6 +16,7 @@ Dependencies:
 
 Compilation:
 
+    git submodule update --init --recursive
     cargo build --release
 
 Usage
