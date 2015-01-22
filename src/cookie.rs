@@ -18,14 +18,26 @@ impl SipHashKey {
     }
 }
 
+#[derive(Hash)]
+struct CookieInput {
+    ip_src: [u8; 4],
+    ip_dst: [u8; 4],
+    th_sport: u16,
+    th_dport: u16,
+    uts: u64
+}
+
 #[allow(unused_must_use)]
 pub fn tcp(ip_src: [u8; 4], ip_dst: [u8; 4], th_sport: u16, th_dport: u16,
            sk: SipHashKey, uts: u64) -> u32 {
+    let input = CookieInput {
+        ip_src: ip_src,
+        ip_dst: ip_dst,
+        th_sport: th_sport,
+        th_dport: th_dport,
+        uts: uts
+    };
     let sip = &mut SipHasher::new_with_keys(sk.k1, sk.k2);
-    ip_src.hash(sip);
-    ip_dst.hash(sip);
-    th_sport.hash(sip);
-    th_dport.hash(sip);
-    uts.hash(sip);
+    input.hash(sip);
     sip.finish() as u32
 }
