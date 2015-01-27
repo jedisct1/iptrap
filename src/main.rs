@@ -22,7 +22,7 @@ use iptrap::{TH_SYN, TH_ACK, TH_RST};
 use iptrap::{checksum, cookie};
 use rustc_serialize::json::{ToJson,Json};
 use std::collections::HashMap;
-use std::io::net::ip::{IpAddr, Ipv4Addr};
+use std::old_io::net::ip::{IpAddr, Ipv4Addr};
 use std::sync::mpsc::{channel, Sender, Receiver};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, ATOMIC_BOOL_INIT};
@@ -132,7 +132,7 @@ fn spawn_time_updater(time_needs_update: &'static AtomicBool) {
     Thread::spawn(move || {
             loop {
                 time_needs_update.store(true, Relaxed);
-                std::io::timer::sleep(Duration::seconds(10));
+                std::old_io::timer::sleep(Duration::seconds(10));
             }
             ()
         });
