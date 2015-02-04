@@ -1,4 +1,6 @@
 
+#![feature(collections)]
+
 extern crate std;
 
 use std::mem::size_of;
