@@ -15,8 +15,11 @@ version = "*"
 [dependencies.time]
 time = "*"
 
-[dependencies]
+[dependencies.rustc-serialize]
 rustc-serialize = "*"
+
+[dependencies.rand]
+rustc-rand = "*"
 
 [lib]
 name = "iptrap"

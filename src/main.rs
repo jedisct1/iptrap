@@ -2,12 +2,12 @@
 #![warn(non_camel_case_types,
         non_upper_case_globals,
         unused_qualifications)]
-#![allow(unstable)]
+#![feature(std_misc, rustc_private, io, libc, core, os)]
 #[macro_use] extern crate log;
 
+extern crate "rustc-serialize" as rustc_serialize;
 extern crate iptrap;
 extern crate libc;
-extern crate "rustc-serialize" as rustc_serialize;
 extern crate time;
 extern crate zmq;
 

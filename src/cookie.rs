@@ -1,6 +1,7 @@
 
 use std::hash::{Hash, Hasher, SipHasher};
-use std::rand;
+
+extern crate rand;
 
 pub struct SipHashKey {
     k1: u64,
