@@ -2,7 +2,7 @@
 #![warn(non_camel_case_types,
         non_upper_case_globals,
         unused_qualifications)]
-#![feature(std_misc, rustc_private, io, libc, core, os)]
+#![feature(std_misc, core, os, io, rustc_private, libc, net)]
 #[macro_use] extern crate log;
 
 extern crate "rustc-serialize" as rustc_serialize;
@@ -22,7 +22,7 @@ use iptrap::{TH_SYN, TH_ACK, TH_RST};
 use iptrap::{checksum, cookie};
 use rustc_serialize::json::{ToJson,Json};
 use std::collections::HashMap;
-use std::old_io::net::ip::{IpAddr, Ipv4Addr};
+use std::net::IpAddr;
 use std::sync::mpsc::{channel, Sender, Receiver};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, ATOMIC_BOOL_INIT};
@@ -155,7 +155,7 @@ fn main() {
         Err(_) => { return usage(); }
     };
     let local_ip = match local_addr {
-        Ipv4Addr(a, b, c, d) => vec!(a, b, c, d),
+        IpAddr::V4(addr) => addr.octets().to_vec(),
         _ => panic!("Only IPv4 is supported for now")
     };
     let pcap = Pcap::open_live(args[1].as_slice()).unwrap();
