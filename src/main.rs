@@ -2,7 +2,7 @@
 #![warn(non_camel_case_types,
         non_upper_case_globals,
         unused_qualifications)]
-#![feature(std_misc, core, os, old_io, rustc_private, libc, net)]
+#![feature(std_misc, core, env, old_io, rustc_private, libc, net)]
 #[macro_use] extern crate log;
 
 extern crate "rustc-serialize" as rustc_serialize;
@@ -22,13 +22,13 @@ use iptrap::{TH_SYN, TH_ACK, TH_RST};
 use iptrap::{checksum, cookie};
 use rustc_serialize::json::{ToJson,Json};
 use std::collections::HashMap;
+use std::env;
 use std::net::IpAddr;
-use std::sync::mpsc::{channel, Sender, Receiver};
-use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, ATOMIC_BOOL_INIT};
-use std::sync::atomic::Ordering::Relaxed;
 use std::num::Int;
-use std::os;
+use std::sync::Arc;
+use std::sync::atomic::Ordering::Relaxed;
+use std::sync::atomic::{AtomicBool, ATOMIC_BOOL_INIT};
+use std::sync::mpsc::{channel, Sender, Receiver};
 use std::thread;
 use std::time::Duration;
 
@@ -146,7 +146,7 @@ fn packet_should_be_bypassed(dissector: &PacketDissector) -> bool {
 
 #[allow(unreachable_code)]
 fn main() {
-    let args = os::args();
+    let args: Vec<String> = env::args().collect();
     if args.len() != 5 {
         return usage();
     }
