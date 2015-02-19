@@ -34,7 +34,6 @@ use std::time::Duration;
 
 static STREAM_PORT: u16 = 9922;
 static SSH_PORT: u16 = 22;
-static WSD_PORT: u16 = 3702;
 
 fn send_tcp_synack(sk: cookie::SipHashKey, chan: &Sender<EmptyTcpPacket>,
                    dissector: &PacketDissector, ts: u64) {
@@ -140,8 +139,7 @@ fn spawn_time_updater(time_needs_update: &'static AtomicBool) {
 
 fn packet_should_be_bypassed(dissector: &PacketDissector) -> bool {
     let th_dport = unsafe { *dissector.tcphdr_ptr }.th_dport;
-    th_dport == STREAM_PORT.to_be() || th_dport == SSH_PORT.to_be() ||
-    th_dport == WSD_PORT.to_be()
+    th_dport == STREAM_PORT.to_be() || th_dport == SSH_PORT.to_be()
 }
 
 #[allow(unreachable_code)]
