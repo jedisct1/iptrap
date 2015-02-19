@@ -2,7 +2,7 @@
 #![warn(non_camel_case_types,
         non_upper_case_globals,
         unused_qualifications)]
-#![feature(std_misc, core, os, io, rustc_private, libc, net)]
+#![feature(std_misc, core, os, old_io, rustc_private, libc, net)]
 #[macro_use] extern crate log;
 
 extern crate "rustc-serialize" as rustc_serialize;
