@@ -29,7 +29,7 @@ use std::sync::atomic::{AtomicBool, ATOMIC_BOOL_INIT};
 use std::sync::atomic::Ordering::Relaxed;
 use std::num::Int;
 use std::os;
-use std::thread::Thread;
+use std::thread;
 use std::time::Duration;
 
 static STREAM_PORT: u16 = 9922;
@@ -129,7 +129,7 @@ fn usage() {
 
 #[allow(unreachable_code)]
 fn spawn_time_updater(time_needs_update: &'static AtomicBool) {
-    Thread::spawn(move || {
+    thread::spawn(move || {
             loop {
                 time_needs_update.store(true, Relaxed);
                 std::old_io::timer::sleep(Duration::seconds(10));
@@ -170,7 +170,7 @@ fn main() {
     let (packetwriter_chan, packetwriter_port):
         (Sender<EmptyTcpPacket>, Receiver<EmptyTcpPacket>) = channel();
     let pcap_arc0 = pcap_arc.clone();
-    Thread::spawn(move || {
+    thread::spawn(move || {
             loop {
                 let pkt = packetwriter_port.recv().unwrap();
                 let _ = pcap_arc0.send_packet(&pkt);
