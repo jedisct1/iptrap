@@ -9,8 +9,7 @@ homepage = "https://github.com/jedisct1/iptrap"
 repository = "https://github.com/jedisct1/iptrap"
 
 [dependencies.zmq]
-path = "rust-zmq"
-version = "*"
+zmq = "*"
 
 [dependencies.time]
 time = "*"
