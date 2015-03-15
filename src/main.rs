@@ -126,7 +126,7 @@ fn usage() {
     println!("Usage: iptrap <device> <local ip address> <uid> <gid>");
 }
 
-#[allow(unreachable_code)]
+#[allow(unreachable_code, deprecated)]
 fn spawn_time_updater(time_needs_update: &'static AtomicBool) {
     thread::spawn(move || {
             loop {
