@@ -2,7 +2,7 @@
 #![warn(non_camel_case_types,
         non_upper_case_globals,
         unused_qualifications)]
-#![feature(std_misc, core, old_io, rustc_private, libc)]
+#![feature(std_misc, core, thread_sleep, rustc_private, libc)]
 #[macro_use] extern crate log;
 
 extern crate "rustc-serialize" as rustc_serialize;
@@ -131,7 +131,7 @@ fn spawn_time_updater(time_needs_update: &'static AtomicBool) {
     thread::spawn(move || {
             loop {
                 time_needs_update.store(true, Relaxed);
-                std::old_io::timer::sleep(Duration::seconds(10));
+                std::thread::sleep(Duration::seconds(10));
             }
             ()
         });
