@@ -5,7 +5,7 @@
         non_upper_case_globals,
         unused_qualifications)]
 
-#![feature(core, libc, collections, step_by)]
+#![feature(libc, collections, step_by)]
 
 extern crate libc;
 

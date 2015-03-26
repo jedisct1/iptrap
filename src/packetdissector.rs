@@ -78,7 +78,7 @@ impl PacketDissector {
         if ll_data_len < size_of::<EtherHeader>() {
             return Err("Short ethernet frame");
         }
-        let ll_data_ptr = ll_data.as_slice().as_ptr();
+        let ll_data_ptr = ll_data.as_ptr();
         let etherhdr_ptr: *const EtherHeader = ll_data_ptr as *const EtherHeader;
         let ref etherhdr = unsafe { *etherhdr_ptr };
         if etherhdr.ether_type != ETHERTYPE_IP.to_be() {
