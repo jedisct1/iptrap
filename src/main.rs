@@ -2,7 +2,7 @@
 #![warn(non_camel_case_types,
         non_upper_case_globals,
         unused_qualifications)]
-#![feature(std_misc, core, thread_sleep, rustc_private, libc)]
+#![feature(std_misc, thread_sleep, rustc_private, libc)]
 #[macro_use] extern crate log;
 
 extern crate rustc_serialize;
@@ -106,7 +106,7 @@ fn log_tcp_ack(zmq_ctx: &mut zmq::Socket, sk: cookie::SipHashKey,
         }
     }
     let tcp_data_str =
-        String::from_utf8_lossy(dissector.tcp_data.as_slice()).into_owned();
+        String::from_utf8_lossy(&dissector.tcp_data).into_owned();
     let ip_src = s_iphdr.ip_src;
     let dport = Int::from_be(s_tcphdr.th_dport);
     let mut record: HashMap<String, Json> = HashMap::with_capacity(4);
@@ -153,7 +153,7 @@ fn main() {
         Err(_) => { return usage(); }
     };
     let local_ip = local_addr.octets().to_vec();
-    let pcap = Pcap::open_live(args[1].as_slice()).unwrap();
+    let pcap = Pcap::open_live(&args[1]).unwrap();
     privilegesdrop::switch_user(args[3].parse().ok(), args[4].parse().ok());
     match pcap.data_link_type() {
         DataLinkType::Ethernet => (),
@@ -175,7 +175,7 @@ fn main() {
     let mut zmq_ctx = zmq::Context::new();
     let mut zmq_socket = zmq_ctx.socket(zmq::SocketType::PUB).unwrap();
     let _ = zmq_socket.set_linger(1);
-    let _ = zmq_socket.bind(format!("tcp://0.0.0.0:{}", STREAM_PORT).as_slice());
+    let _ = zmq_socket.bind(&format!("tcp://0.0.0.0:{}", STREAM_PORT));
     static TIME_NEEDS_UPDATE: AtomicBool = ATOMIC_BOOL_INIT;
     spawn_time_updater(&TIME_NEEDS_UPDATE);
     let mut ts = time::get_time().sec as u64 & !0x3f;
