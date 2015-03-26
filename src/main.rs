@@ -5,7 +5,7 @@
 #![feature(std_misc, core, thread_sleep, rustc_private, libc)]
 #[macro_use] extern crate log;
 
-extern crate "rustc-serialize" as rustc_serialize;
+extern crate rustc_serialize;
 extern crate iptrap;
 extern crate libc;
 extern crate time;
