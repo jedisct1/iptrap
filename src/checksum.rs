@@ -1,6 +1,5 @@
 
 use packetdissector::{IpHeader, TcpHeader};
-use std::num::Int;
 use std::mem::size_of_val;
 
 pub fn ip_header(iphdr: &mut IpHeader) {
