@@ -3,12 +3,11 @@ use std::hash::{Hash, Hasher, SipHasher};
 
 extern crate rand;
 
+#[derive(Copy, Clone)]
 pub struct SipHashKey {
     k1: u64,
     k2: u64
 }
-
-impl Copy for SipHashKey { }
 
 impl SipHashKey {
     pub fn new() -> SipHashKey {

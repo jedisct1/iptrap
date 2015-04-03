@@ -6,14 +6,13 @@ use std::mem::size_of;
 extern crate rand;
 
 #[repr(packed)]
+#[derive(Copy, Clone)]
 pub struct EmptyTcpPacket {
     pub etherhdr: EtherHeader,
     pub iphdr: IpHeader,
     pub tcphdr: TcpHeader,
     pub tcpoptions: [u8; 4]
 }
-
-impl Copy for EmptyTcpPacket { }
 
 impl EmptyTcpPacket {
     pub fn new() -> EmptyTcpPacket {

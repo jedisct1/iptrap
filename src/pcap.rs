@@ -14,6 +14,7 @@ pub type Pcap_ = *mut c_void;
 
 #[allow(dead_code)]
 #[repr(C)]
+#[derive(Copy)]
 pub struct PacketHeader {
     ts: timeval,
     caplen: u32,
@@ -21,7 +22,9 @@ pub struct PacketHeader {
     comment: [u8; 256]
 }
 
-impl Copy for PacketHeader { }
+impl Clone for PacketHeader {
+     fn clone(&self) -> PacketHeader { *self }
+}
 
 pub struct PcapPacket {
     pub ll_data: Vec<u8>
@@ -38,8 +41,6 @@ pub enum DataLinkType {
     Null = 0,
     Ethernet = 1
 }
-
-impl Copy for DataLinkType { }
 
 #[link(name = "pcap")]
 extern {

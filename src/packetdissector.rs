@@ -11,15 +11,15 @@ pub static TH_ACK: u8 = 0x10;
 pub static TH_PUSH: u8 = 0x08;
 
 #[repr(packed)]
+#[derive(Copy, Clone)]
 pub struct EtherHeader {
     pub ether_dhost: [u8; 6],
     pub ether_shost: [u8; 6],
     pub ether_type: u16
 }
 
-impl Copy for EtherHeader { }
-
 #[repr(packed)]
+#[derive(Copy, Clone)]
 pub struct IpHeader {
     pub ip_vhl: u8,
     pub ip_tos: u8,
@@ -33,9 +33,8 @@ pub struct IpHeader {
     pub ip_dst: [u8; 4]
 }
 
-impl Copy for IpHeader { }
-
 #[repr(packed)]
+#[derive(Clone, Copy)]
 pub struct TcpHeader {
     pub th_sport: u16,
     pub th_dport: u16,
@@ -47,8 +46,6 @@ pub struct TcpHeader {
     pub th_sum: u16,
     pub th_urp: u16
 }
-
-impl Copy for TcpHeader { }
 
 pub struct PacketDissectorFilter {
     local_ip: Vec<u8>
