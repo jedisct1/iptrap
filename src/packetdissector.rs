@@ -2,7 +2,6 @@
 extern crate std;
 
 use std::mem::size_of;
-use std::num::Int;
 
 pub static ETHERTYPE_IP: u16 = 0x0800;
 pub static IPPROTO_TCP: u8 = 6;
@@ -124,7 +123,7 @@ impl PacketDissector {
         }
         let tcp_data_offset = tcphdr_offset + tcphdr_data_offset;
 
-        let ip_len = Int::from_be(iphdr.ip_len) as usize;
+        let ip_len = u16::from_be(iphdr.ip_len) as usize;
         if ip_len < tcp_data_offset - tcp_data_offset {
             return Err("Truncated TCP packet - truncated data");
         }
