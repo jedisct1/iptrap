@@ -2,7 +2,6 @@ language: rust
 
 rust:
   - nightly
-  - 1.0.0-beta
 
 before_script:
   - sudo apt-get install libpcap-dev
