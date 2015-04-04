@@ -2,7 +2,6 @@
 #![warn(non_camel_case_types,
         non_upper_case_globals,
         unused_qualifications)]
-#![feature(std_misc, thread_sleep)]
 #[macro_use] extern crate log;
 
 extern crate rustc_serialize;
@@ -29,7 +28,6 @@ use std::sync::atomic::Ordering::Relaxed;
 use std::sync::atomic::{AtomicBool, ATOMIC_BOOL_INIT};
 use std::sync::mpsc::{channel, Sender, Receiver};
 use std::thread;
-use std::time::Duration;
 
 static STREAM_PORT: u16 = 9922;
 static SSH_PORT: u16 = 22;
@@ -130,7 +128,7 @@ fn spawn_time_updater(time_needs_update: &'static AtomicBool) {
     thread::spawn(move || {
             loop {
                 time_needs_update.store(true, Relaxed);
-                std::thread::sleep(Duration::seconds(10));
+                thread::sleep_ms(10 * 1000);
             }
             ()
         });
