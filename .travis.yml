@@ -1,7 +1,9 @@
 language: rust
 
-rust: nightly
+rust:
+  - nightly
+  - 1.0.0-beta
 
 before_script:
- - sudo apt-get install libpcap-dev
- - sudo apt-get install libzmq3-dev
+  - sudo apt-get install libpcap-dev
+  - sudo apt-get install libzmq3-dev
