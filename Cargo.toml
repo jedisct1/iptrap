@@ -20,6 +20,12 @@ rustc-serialize = "*"
 [dependencies.rand]
 rustc-rand = "*"
 
+[dependencies.libc]
+libc = "*"
+
+[dependencies.log]
+log = "*"
+
 [lib]
 name = "iptrap"
 path = "src/lib.rs"

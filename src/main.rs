@@ -2,7 +2,7 @@
 #![warn(non_camel_case_types,
         non_upper_case_globals,
         unused_qualifications)]
-#![feature(std_misc, thread_sleep, rustc_private, libc)]
+#![feature(std_misc, thread_sleep)]
 #[macro_use] extern crate log;
 
 extern crate rustc_serialize;
