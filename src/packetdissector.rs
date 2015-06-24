@@ -2,6 +2,7 @@
 extern crate std;
 
 use std::mem::size_of;
+use std::slice;
 
 pub static ETHERTYPE_IP: u16 = 0x0800;
 pub static IPPROTO_TCP: u8 = 6;
@@ -131,8 +132,8 @@ impl PacketDissector {
             ll_data_ptr.offset(tcp_data_offset as isize)
         };
         let tcp_data = unsafe {
-            Vec::from_raw_buf(tcp_data_ptr as *mut u8, tcp_data_len)
-        };
+            slice::from_raw_parts(tcp_data_ptr as *mut u8, tcp_data_len)
+        }.to_vec();
         Ok(PacketDissector {
                 ll_data: ll_data,
                 etherhdr_ptr: etherhdr_ptr,

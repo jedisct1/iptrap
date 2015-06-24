@@ -6,6 +6,7 @@ use libc::{c_void, c_char, c_int};
 use std::ffi;
 use std::mem;
 use std::ptr;
+use std::slice;
 use std::str;
 
 pub const PCAP_ERRBUF_SIZE: usize = 256;
@@ -91,8 +92,8 @@ impl Pcap {
                 let packet_header = unsafe { *packet_header_pnt };
                 let ll_data_len = packet_header.caplen as usize;
                 let ll_data = unsafe {
-                    Vec::from_raw_buf(ll_data_pnt as *mut u8, ll_data_len)
-                };
+                    slice::from_raw_parts(ll_data_pnt as *mut u8, ll_data_len)
+                }.to_vec();
                 Some(PcapPacket {
                         ll_data: ll_data
                     })
