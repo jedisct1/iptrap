@@ -12,6 +12,6 @@ impl StrSliceEscape for String {
                 _ => '?'
             })
         }
-        out.to_string()
+        out
     }
 }

@@ -66,7 +66,7 @@ impl Pcap {
         if pcap.is_null() {
             return Err(unsafe {
                 str::from_utf8(ffi::CStr::from_ptr(errbuf).
-                               to_bytes()).unwrap() }.to_string())
+                               to_bytes()).unwrap() }.to_owned())
         }
         Ok(Pcap {
             pcap_: pcap
