@@ -34,10 +34,10 @@ static SSH_PORT: u16 = 22;
 
 fn send_tcp_synack(sk: cookie::SipHashKey, chan: &Sender<EmptyTcpPacket>,
                    dissector: &PacketDissector, ts: u64) {
-    let ref s_etherhdr: EtherHeader = unsafe { *dissector.etherhdr_ptr };
+    let s_etherhdr: &EtherHeader = &unsafe { *dissector.etherhdr_ptr };
     assert!(s_etherhdr.ether_type == ETHERTYPE_IP.to_be());
-    let ref s_iphdr: IpHeader = unsafe { *dissector.iphdr_ptr };
-    let ref s_tcphdr: TcpHeader = unsafe { *dissector.tcphdr_ptr };
+    let s_iphdr: &IpHeader = &unsafe { *dissector.iphdr_ptr };
+    let s_tcphdr: &TcpHeader = &unsafe { *dissector.tcphdr_ptr };
 
     let mut sa_packet: EmptyTcpPacket = EmptyTcpPacket::new();
     sa_packet.etherhdr.ether_shost = s_etherhdr.ether_dhost;
@@ -60,10 +60,10 @@ fn send_tcp_synack(sk: cookie::SipHashKey, chan: &Sender<EmptyTcpPacket>,
 }
 
 fn send_tcp_rst(chan: &Sender<EmptyTcpPacket>, dissector: &PacketDissector) {
-    let ref s_etherhdr: EtherHeader = unsafe { *dissector.etherhdr_ptr };
+    let s_etherhdr: &EtherHeader = &unsafe { *dissector.etherhdr_ptr };
     assert!(s_etherhdr.ether_type == ETHERTYPE_IP.to_be());
-    let ref s_iphdr: IpHeader = unsafe { *dissector.iphdr_ptr };
-    let ref s_tcphdr: TcpHeader = unsafe { *dissector.tcphdr_ptr };
+    let s_iphdr: &IpHeader = &unsafe { *dissector.iphdr_ptr };
+    let s_tcphdr: &TcpHeader = &unsafe { *dissector.tcphdr_ptr };
     let mut rst_packet: EmptyTcpPacket = EmptyTcpPacket::new();
     rst_packet.etherhdr.ether_shost = s_etherhdr.ether_dhost;
     rst_packet.etherhdr.ether_dhost = s_etherhdr.ether_shost;
@@ -86,8 +86,8 @@ fn log_tcp_ack(zmq_ctx: &mut zmq::Socket, sk: cookie::SipHashKey,
     if dissector.tcp_data.len() <= 0 {
         return false;
     }
-    let ref s_iphdr: IpHeader = unsafe { *dissector.iphdr_ptr };
-    let ref s_tcphdr: TcpHeader = unsafe { *dissector.tcphdr_ptr };
+    let s_iphdr: &IpHeader = &unsafe { *dissector.iphdr_ptr };
+    let s_tcphdr: &TcpHeader = &unsafe { *dissector.tcphdr_ptr };
     let ack_cookie = cookie::tcp(s_iphdr.ip_dst, s_iphdr.ip_src,
                                  s_tcphdr.th_dport, s_tcphdr.th_sport,
                                  sk, ts);
@@ -107,12 +107,12 @@ fn log_tcp_ack(zmq_ctx: &mut zmq::Socket, sk: cookie::SipHashKey,
     let ip_src = s_iphdr.ip_src;
     let dport = u16::from_be(s_tcphdr.th_dport);
     let mut record: HashMap<String, Json> = HashMap::with_capacity(4);
-    record.insert("ts".to_string(), Json::U64(ts));
-    record.insert("ip_src".to_string(), Json::String(format!("{}.{}.{}.{}",
+    record.insert("ts".to_owned(), Json::U64(ts));
+    record.insert("ip_src".to_owned(), Json::String(format!("{}.{}.{}.{}",
                                                             ip_src[0], ip_src[1],
-                                                            ip_src[2], ip_src[3]).to_string()));
-    record.insert("dport".to_string(), Json::U64(dport as u64));
-    record.insert("payload".to_string(), Json::String(tcp_data_str.escape_default_except_lf().to_string()));
+                                                            ip_src[2], ip_src[3]).to_owned()));
+    record.insert("dport".to_owned(), Json::U64(dport as u64));
+    record.insert("payload".to_owned(), Json::String(tcp_data_str.escape_default_except_lf().to_owned()));
     let json = record.to_json().to_string();
     let _ = zmq_ctx.send(json.as_bytes(), 0);
     info!("{}", json);
@@ -196,10 +196,9 @@ fn main() {
         let th_flags = unsafe { *dissector.tcphdr_ptr }.th_flags;
         if th_flags == TH_SYN {
             send_tcp_synack(sk, &packetwriter_chan, &dissector, ts);
-        } else if (th_flags & TH_ACK) == TH_ACK && (th_flags & TH_SYN) == 0 {
-            if log_tcp_ack(&mut zmq_socket, sk, &dissector, ts) {
-                send_tcp_rst(&packetwriter_chan, &dissector);
-            }
+        } else if (th_flags & TH_ACK) == TH_ACK && (th_flags & TH_SYN) == 0 &&
+                   log_tcp_ack(&mut zmq_socket, sk, &dissector, ts) {
+            send_tcp_rst(&packetwriter_chan, &dissector);
         }
     }
 }
