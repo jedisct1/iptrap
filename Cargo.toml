@@ -9,7 +9,7 @@ homepage = "https://github.com/jedisct1/iptrap"
 repository = "https://github.com/jedisct1/iptrap"
 
 [dependencies.zmq]
-zmq = "*"
+git = "https://github.com/erickt/rust-zmq.git"
 
 [dependencies.time]
 time = "*"

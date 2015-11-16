@@ -1,8 +1,7 @@
 
 extern crate libc;
 
-use libc::types::os::common::posix01::timeval;
-use libc::{c_void, c_char, c_int};
+use libc::{c_void, c_char, c_int, timeval};
 use std::ffi;
 use std::mem;
 use std::ptr;
