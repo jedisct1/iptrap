@@ -6,7 +6,6 @@
 
 extern crate rustc_serialize;
 extern crate iptrap;
-extern crate libc;
 extern crate time;
 extern crate zmq;
 

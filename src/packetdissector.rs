@@ -1,6 +1,5 @@
 
-extern crate std;
-
+use std;
 use std::mem::size_of;
 use std::slice;
 

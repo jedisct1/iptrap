@@ -1,6 +1,4 @@
 
-extern crate libc;
-
 use libc::{c_void, c_char, c_int, timeval};
 use std::ffi;
 use std::mem;
