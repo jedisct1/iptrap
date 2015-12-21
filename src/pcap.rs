@@ -1,5 +1,7 @@
 
-use libc::{c_void, c_char, c_int, timeval};
+extern crate libc;
+
+use self::libc::{c_void, c_char, c_int, timeval};
 use std::ffi;
 use std::mem;
 use std::ptr;
