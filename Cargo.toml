@@ -12,19 +12,19 @@ repository = "https://github.com/jedisct1/iptrap"
 git = "https://github.com/erickt/rust-zmq.git"
 
 [dependencies.time]
-time = "*"
+version = ">= 0.1.34"
 
 [dependencies.rustc-serialize]
-rustc-serialize = "*"
+version = ">= 0.3.16"
 
 [dependencies.rand]
-rustc-rand = "*"
+version = ">= 0.3.13"
 
 [dependencies.libc]
-libc = "*"
+version = ">= 0.2.4"
 
 [dependencies.log]
-log = "*"
+version = ">= 0.3.5"
 
 [lib]
 name = "iptrap"
