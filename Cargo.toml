@@ -15,13 +15,13 @@ git = "https://github.com/erickt/rust-zmq.git"
 version = ">= 0.1.34"
 
 [dependencies.rustc-serialize]
-version = ">= 0.3.16"
+version = ">= 0.3.18"
 
 [dependencies.rand]
-version = ">= 0.3.13"
+version = ">= 0.3.14"
 
 [dependencies.libc]
-version = ">= 0.2.4"
+version = ">= 0.2.7"
 
 [dependencies.log]
 version = ">= 0.3.5"

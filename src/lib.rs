@@ -7,6 +7,8 @@
 
 #![feature(step_by)]
 
+extern crate libc;
+
 pub use emptytcppacket::*;
 pub use packetdissector::*;
 pub use pcap::*;
