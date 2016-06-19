@@ -1,7 +1,7 @@
 
 [package]
 name = "iptrap"
-version = "1.0.1"
+version = "1.0.2"
 authors = ["Frank Denis <github@pureftpd.org>"]
 description = "A fast, stateless TCP sinkhole"
 license = "ISC"
@@ -12,19 +12,19 @@ repository = "https://github.com/jedisct1/iptrap"
 git = "https://github.com/erickt/rust-zmq.git"
 
 [dependencies.time]
-version = ">= 0.1.34"
+version = "~0.1.35"
 
 [dependencies.rustc-serialize]
-version = ">= 0.3.18"
+version = "~0.3.19"
 
 [dependencies.rand]
-version = ">= 0.3.14"
+version = "~0.3.14"
 
 [dependencies.libc]
-version = ">= 0.2.7"
+version = "~0.2.12"
 
 [dependencies.log]
-version = ">= 0.3.5"
+version = "~0.3.6"
 
 [lib]
 name = "iptrap"
