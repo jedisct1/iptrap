@@ -15,7 +15,7 @@ pub static TH_PUSH: u8 = 0x08;
 pub struct EtherHeader {
     pub ether_dhost: [u8; 6],
     pub ether_shost: [u8; 6],
-    pub ether_type: u16
+    pub ether_type: u16,
 }
 
 #[repr(packed)]
@@ -30,7 +30,7 @@ pub struct IpHeader {
     pub ip_p: u8,
     pub ip_sum: u16,
     pub ip_src: [u8; 4],
-    pub ip_dst: [u8; 4]
+    pub ip_dst: [u8; 4],
 }
 
 #[repr(packed)]
@@ -44,18 +44,16 @@ pub struct TcpHeader {
     pub th_flags: u8,
     pub th_win: u16,
     pub th_sum: u16,
-    pub th_urp: u16
+    pub th_urp: u16,
 }
 
 pub struct PacketDissectorFilter {
-    local_ip: Vec<u8>
+    local_ip: Vec<u8>,
 }
 
 impl PacketDissectorFilter {
     pub fn new(local_ip: Vec<u8>) -> PacketDissectorFilter {
-        PacketDissectorFilter {
-            local_ip: local_ip
-        }
+        PacketDissectorFilter { local_ip: local_ip }
     }
 }
 
@@ -64,12 +62,11 @@ pub struct PacketDissector {
     pub etherhdr_ptr: *const EtherHeader,
     pub iphdr_ptr: *const IpHeader,
     pub tcphdr_ptr: *const TcpHeader,
-    pub tcp_data: Vec<u8>
+    pub tcp_data: Vec<u8>,
 }
 
 impl PacketDissector {
-    pub fn new(filter: &PacketDissectorFilter,
-               ll_data: Vec<u8>) -> Result<PacketDissector, &str> {
+    pub fn new(filter: &PacketDissectorFilter, ll_data: Vec<u8>) -> Result<PacketDissector, &str> {
         let ll_data_len = ll_data.len();
         if ll_data_len < size_of::<EtherHeader>() {
             return Err("Short ethernet frame");
@@ -82,16 +79,14 @@ impl PacketDissector {
         }
         let iphdr_offset: usize = size_of::<EtherHeader>();
         if ll_data_len - iphdr_offset < size_of::<IpHeader>() {
-            return Err("Short IP packet")
+            return Err("Short IP packet");
         }
-        let iphdr_ptr: *const IpHeader = unsafe {
-            ll_data_ptr.offset(iphdr_offset as isize) as *const IpHeader
-        };
+        let iphdr_ptr: *const IpHeader =
+            unsafe { ll_data_ptr.offset(iphdr_offset as isize) as *const IpHeader };
         let ref iphdr: IpHeader = unsafe { *iphdr_ptr };
         let iphdr_len = (iphdr.ip_vhl & 0xf) as usize * 4;
-        if iphdr_len < size_of::<IpHeader>() ||
-            ll_data_len - iphdr_offset < iphdr_len {
-            return Err("Short IP packet")
+        if iphdr_len < size_of::<IpHeader>() || ll_data_len - iphdr_offset < iphdr_len {
+            return Err("Short IP packet");
         }
         let ip_version = (iphdr.ip_vhl >> 4) & 0xf;
         if ip_version != 4 {
@@ -107,9 +102,8 @@ impl PacketDissector {
         if ll_data_len - tcphdr_offset < size_of::<TcpHeader>() {
             return Err("Short TCP packet");
         }
-        let tcphdr_ptr: *const TcpHeader = unsafe {
-            ll_data_ptr.offset(tcphdr_offset as isize) as *const TcpHeader
-        };
+        let tcphdr_ptr: *const TcpHeader =
+            unsafe { ll_data_ptr.offset(tcphdr_offset as isize) as *const TcpHeader };
         let ref tcphdr: TcpHeader = unsafe { *tcphdr_ptr };
         let tcphdr_data_offset = ((tcphdr.th_off_x2 >> 4) & 0xf) as usize * 4;
         if tcphdr_data_offset < size_of::<TcpHeader>() {
@@ -127,18 +121,15 @@ impl PacketDissector {
         let real_tcp_data_len = ip_len - iphdr_len - tcphdr_data_offset;
         let max_tcp_data_len = ll_data_len - tcp_data_offset;
         let tcp_data_len = std::cmp::min(real_tcp_data_len, max_tcp_data_len);
-        let tcp_data_ptr = unsafe {
-            ll_data_ptr.offset(tcp_data_offset as isize)
-        };
-        let tcp_data = unsafe {
-            slice::from_raw_parts(tcp_data_ptr as *mut u8, tcp_data_len)
-        }.to_vec();
+        let tcp_data_ptr = unsafe { ll_data_ptr.offset(tcp_data_offset as isize) };
+        let tcp_data = unsafe { slice::from_raw_parts(tcp_data_ptr as *mut u8, tcp_data_len) }
+            .to_vec();
         Ok(PacketDissector {
-                ll_data: ll_data,
-                etherhdr_ptr: etherhdr_ptr,
-                iphdr_ptr: iphdr_ptr,
-                tcphdr_ptr: tcphdr_ptr,
-                tcp_data: tcp_data
-            })
+            ll_data: ll_data,
+            etherhdr_ptr: etherhdr_ptr,
+            iphdr_ptr: iphdr_ptr,
+            tcphdr_ptr: tcphdr_ptr,
+            tcp_data: tcp_data,
+        })
     }
 }

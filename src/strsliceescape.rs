@@ -8,8 +8,8 @@ impl StrSliceEscape for String {
         let mut out = String::with_capacity(self.len());
         for c in self.chars() {
             out.push(match c {
-                '\r' | '\n' | '\t' | '\x20' ... '\x7e' => c,
-                _ => '?'
+                '\r' | '\n' | '\t' | '\x20'...'\x7e' => c,
+                _ => '?',
             })
         }
         out

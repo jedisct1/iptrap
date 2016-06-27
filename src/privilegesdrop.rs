@@ -8,18 +8,18 @@ pub fn switch_user(uid: Option<uid_t>, gid: Option<gid_t>) {
                 panic!("setgid()");
             }
         }
-        None => ()
+        None => (),
     }
     match uid {
         Some(uid) => {
-            extern {
+            extern "C" {
                 fn setgroups(ngroups: c_int, ptr: *const c_void) -> c_int;
             }
             let _ = unsafe { setgroups(0, 0 as *const c_void) };
             if unsafe { setuid(uid) } != 0 {
                 panic!("setuid()");
             }
-        },
-        None => ()
+        }
+        None => (),
     }
 }
