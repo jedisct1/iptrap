@@ -1,7 +1,9 @@
 
-use std::hash::{Hash, Hasher, SipHasher};
-
 extern crate rand;
+extern crate siphasher;
+
+use siphasher::sip13::SipHasher;
+use std::hash::{Hash, Hasher};
 
 #[derive(Copy, Clone)]
 pub struct SipHashKey {
