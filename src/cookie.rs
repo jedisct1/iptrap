@@ -2,7 +2,7 @@
 extern crate rand;
 extern crate siphasher;
 
-use siphasher::sip13::SipHasher;
+use self::siphasher::sip::SipHasher13;
 use std::hash::{Hash, Hasher};
 
 #[derive(Copy, Clone)]
@@ -44,7 +44,7 @@ pub fn tcp(ip_src: [u8; 4],
         th_dport: th_dport,
         uts: uts,
     };
-    let sip = &mut SipHasher::new_with_keys(sk.k1, sk.k2);
+    let sip = &mut SipHasher13::new_with_keys(sk.k1, sk.k2);
     input.hash(sip);
     sip.finish() as u32
 }
