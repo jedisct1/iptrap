@@ -6,7 +6,7 @@ IPtrap 2
 A fast, stateless TCP sinkhole, implemented in Rust. Performs TCP handshakes
 on all ports and logs the initial payload.
 
-See [A sinkhole that never clogs](http://labs.opendns.com/2014/02/28/dns-sinkhole/)
+See [A sinkhole that never clogs](https://blog.opendns.com/2014/02/28/dns-sinkhole/)
 for an introduction.
 
 Dependencies:
