@@ -12,22 +12,22 @@ repository = "https://github.com/jedisct1/iptrap"
 git = "https://github.com/erickt/rust-zmq.git"
 
 [dependencies.time]
-version = "~0.1.35"
+version = "~0"
 
 [dependencies.rustc-serialize]
-version = "~0.3.19"
+version = "~0"
 
 [dependencies.rand]
-version = "~0.3.14"
+version = "~0"
 
 [dependencies.libc]
-version = "~0.2.12"
+version = "~0"
 
 [dependencies.log]
-version = "~0.3.6"
+version = "~0"
 
 [dependencies.siphasher]
-version = "~0.1"
+version = "~0"
 
 [lib]
 name = "iptrap"
