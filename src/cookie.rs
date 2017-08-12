@@ -1,4 +1,3 @@
-
 extern crate rand;
 extern crate siphasher;
 
@@ -30,13 +29,14 @@ struct CookieInput {
 }
 
 #[allow(unused_must_use)]
-pub fn tcp(ip_src: [u8; 4],
-           ip_dst: [u8; 4],
-           th_sport: u16,
-           th_dport: u16,
-           sk: SipHashKey,
-           uts: u64)
-           -> u32 {
+pub fn tcp(
+    ip_src: [u8; 4],
+    ip_dst: [u8; 4],
+    th_sport: u16,
+    th_dport: u16,
+    sk: SipHashKey,
+    uts: u64,
+) -> u32 {
     let input = CookieInput {
         ip_src: ip_src,
         ip_dst: ip_dst,

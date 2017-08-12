@@ -9,7 +9,7 @@ pub fn ip_header(iphdr: &mut IpHeader) {
     let iphdr_v = unsafe { slice::from_raw_parts(iphdr_ptr as *mut u8, iphdr_len) }.to_vec();
     let mut sum: u64 = (0..iphdr_len).step_by(2).fold(0u64, |sum, i| {
         sum +
-        (((*iphdr_v.get(i).unwrap() as u16) << 8) | *iphdr_v.get(i + 1).unwrap() as u16) as u64
+            (((*iphdr_v.get(i).unwrap() as u16) << 8) | *iphdr_v.get(i + 1).unwrap() as u16) as u64
     });
     while (sum >> 16) != 0 {
         sum = (sum & 0xffff) + (sum >> 16);
@@ -32,7 +32,8 @@ pub fn tcp_header(iphdr: &IpHeader, tcphdr: &mut TcpHeader) {
     let tcphdr_v = unsafe { slice::from_raw_parts(tcphdr_ptr as *mut u8, tcphdr_len) }.to_vec();
     let mut sum: u64 = (0..tcphdr_len).step_by(2).fold(sum0, |sum, i| {
         sum +
-        (((*tcphdr_v.get(i).unwrap() as u16) << 8) | *tcphdr_v.get(i + 1).unwrap() as u16) as u64
+            (((*tcphdr_v.get(i).unwrap() as u16) << 8) | *tcphdr_v.get(i + 1).unwrap() as u16) as
+                u64
     });
     while (sum >> 16) != 0 {
         sum = (sum & 0xffff) + (sum >> 16);

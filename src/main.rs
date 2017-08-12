@@ -1,12 +1,10 @@
 
-#![warn(non_camel_case_types,
-        non_upper_case_globals,
-        unused_qualifications)]
+#![warn(non_camel_case_types, non_upper_case_globals, unused_qualifications)]
 #[macro_use]
 extern crate log;
 
-extern crate rustc_serialize;
 extern crate iptrap;
+extern crate rustc_serialize;
 extern crate time;
 extern crate zmq;
 
@@ -16,26 +14,28 @@ use iptrap::privilegesdrop;
 use iptrap::strsliceescape::StrSliceEscape;
 use iptrap::{EtherHeader, IpHeader, TcpHeader};
 use iptrap::{PacketDissector, PacketDissectorFilter};
-use iptrap::{Pcap, PcapPacket, DataLinkType};
-use iptrap::{TH_SYN, TH_ACK, TH_RST};
+use iptrap::{DataLinkType, Pcap, PcapPacket};
+use iptrap::{TH_ACK, TH_RST, TH_SYN};
 use iptrap::{checksum, cookie};
-use rustc_serialize::json::{ToJson, Json};
+use rustc_serialize::json::{Json, ToJson};
 use std::collections::HashMap;
 use std::env;
 use std::net::Ipv4Addr;
 use std::sync::Arc;
 use std::sync::atomic::Ordering::Relaxed;
 use std::sync::atomic::{AtomicBool, ATOMIC_BOOL_INIT};
-use std::sync::mpsc::{channel, Sender, Receiver};
+use std::sync::mpsc::{channel, Receiver, Sender};
 use std::thread;
 
 static STREAM_PORT: u16 = 9922;
 static SSH_PORT: u16 = 22;
 
-fn send_tcp_synack(sk: cookie::SipHashKey,
-                   chan: &Sender<EmptyTcpPacket>,
-                   dissector: &PacketDissector,
-                   ts: u64) {
+fn send_tcp_synack(
+    sk: cookie::SipHashKey,
+    chan: &Sender<EmptyTcpPacket>,
+    dissector: &PacketDissector,
+    ts: u64,
+) {
     let s_etherhdr: &EtherHeader = &unsafe { *dissector.etherhdr_ptr };
     assert!(s_etherhdr.ether_type == ETHERTYPE_IP.to_be());
     let s_iphdr: &IpHeader = &unsafe { *dissector.iphdr_ptr };
@@ -52,12 +52,14 @@ fn send_tcp_synack(sk: cookie::SipHashKey,
     sa_packet.tcphdr.th_dport = s_tcphdr.th_sport;
     sa_packet.tcphdr.th_flags = TH_SYN | TH_ACK;
     sa_packet.tcphdr.th_ack = (u32::from_be(s_tcphdr.th_seq) + 1u32).to_be();
-    sa_packet.tcphdr.th_seq = cookie::tcp(sa_packet.iphdr.ip_src,
-                                          sa_packet.iphdr.ip_dst,
-                                          sa_packet.tcphdr.th_sport,
-                                          sa_packet.tcphdr.th_dport,
-                                          sk,
-                                          ts);
+    sa_packet.tcphdr.th_seq = cookie::tcp(
+        sa_packet.iphdr.ip_src,
+        sa_packet.iphdr.ip_dst,
+        sa_packet.tcphdr.th_sport,
+        sa_packet.tcphdr.th_dport,
+        sk,
+        ts,
+    );
     checksum::tcp_header(&sa_packet.iphdr, &mut sa_packet.tcphdr);
 
     let _ = chan.send(sa_packet);
@@ -85,31 +87,36 @@ fn send_tcp_rst(chan: &Sender<EmptyTcpPacket>, dissector: &PacketDissector) {
     let _ = chan.send(rst_packet);
 }
 
-fn log_tcp_ack(zmq_ctx: &mut zmq::Socket,
-               sk: cookie::SipHashKey,
-               dissector: &PacketDissector,
-               ts: u64)
-               -> bool {
+fn log_tcp_ack(
+    zmq_ctx: &mut zmq::Socket,
+    sk: cookie::SipHashKey,
+    dissector: &PacketDissector,
+    ts: u64,
+) -> bool {
     if dissector.tcp_data.len() <= 0 {
         return false;
     }
     let s_iphdr: &IpHeader = &unsafe { *dissector.iphdr_ptr };
     let s_tcphdr: &TcpHeader = &unsafe { *dissector.tcphdr_ptr };
-    let ack_cookie = cookie::tcp(s_iphdr.ip_dst,
-                                 s_iphdr.ip_src,
-                                 s_tcphdr.th_dport,
-                                 s_tcphdr.th_sport,
-                                 sk,
-                                 ts);
+    let ack_cookie = cookie::tcp(
+        s_iphdr.ip_dst,
+        s_iphdr.ip_src,
+        s_tcphdr.th_dport,
+        s_tcphdr.th_sport,
+        sk,
+        ts,
+    );
     let wanted_cookie = (u32::from_be(ack_cookie) + 1u32).to_be();
     if s_tcphdr.th_ack != wanted_cookie {
         let ts_alt = ts - 0x40;
-        let ack_cookie_alt = cookie::tcp(s_iphdr.ip_dst,
-                                         s_iphdr.ip_src,
-                                         s_tcphdr.th_dport,
-                                         s_tcphdr.th_sport,
-                                         sk,
-                                         ts_alt);
+        let ack_cookie_alt = cookie::tcp(
+            s_iphdr.ip_dst,
+            s_iphdr.ip_src,
+            s_tcphdr.th_dport,
+            s_tcphdr.th_sport,
+            sk,
+            ts_alt,
+        );
         let wanted_cookie_alt = (u32::from_be(ack_cookie_alt) + 1u32).to_be();
         if s_tcphdr.th_ack != wanted_cookie_alt {
             return false;
@@ -120,12 +127,17 @@ fn log_tcp_ack(zmq_ctx: &mut zmq::Socket,
     let dport = u16::from_be(s_tcphdr.th_dport);
     let mut record: HashMap<String, Json> = HashMap::with_capacity(4);
     record.insert("ts".to_owned(), Json::U64(ts));
-    record.insert("ip_src".to_owned(),
-                  Json::String(format!("{}.{}.{}.{}", ip_src[0], ip_src[1], ip_src[2], ip_src[3])
-                      .to_owned()));
+    record.insert(
+        "ip_src".to_owned(),
+        Json::String(
+            format!("{}.{}.{}.{}", ip_src[0], ip_src[1], ip_src[2], ip_src[3]).to_owned(),
+        ),
+    );
     record.insert("dport".to_owned(), Json::U64(dport as u64));
-    record.insert("payload".to_owned(),
-                  Json::String(tcp_data_str.escape_default_except_lf().to_owned()));
+    record.insert(
+        "payload".to_owned(),
+        Json::String(tcp_data_str.escape_default_except_lf().to_owned()),
+    );
     let json = record.to_json().to_string();
     let _ = zmq_ctx.send(json.as_bytes(), 0);
     info!("{}", json);
@@ -174,8 +186,10 @@ fn main() {
     let sk = cookie::SipHashKey::new();
     let filter = PacketDissectorFilter::new(local_ip);
     let pcap_arc = Arc::new(pcap);
-    let (packetwriter_chan, packetwriter_port):
-        (Sender<EmptyTcpPacket>, Receiver<EmptyTcpPacket>) = channel();
+    let (packetwriter_chan, packetwriter_port): (
+        Sender<EmptyTcpPacket>,
+        Receiver<EmptyTcpPacket>,
+    ) = channel();
     let pcap_arc0 = pcap_arc.clone();
     thread::spawn(move || {
         loop {
@@ -214,7 +228,8 @@ fn main() {
         if th_flags == TH_SYN {
             send_tcp_synack(sk, &packetwriter_chan, &dissector, ts);
         } else if (th_flags & TH_ACK) == TH_ACK && (th_flags & TH_SYN) == 0 &&
-                  log_tcp_ack(&mut zmq_socket, sk, &dissector, ts) {
+            log_tcp_ack(&mut zmq_socket, sk, &dissector, ts)
+        {
             send_tcp_rst(&packetwriter_chan, &dissector);
         }
     }

@@ -122,8 +122,8 @@ impl PacketDissector {
         let max_tcp_data_len = ll_data_len - tcp_data_offset;
         let tcp_data_len = std::cmp::min(real_tcp_data_len, max_tcp_data_len);
         let tcp_data_ptr = unsafe { ll_data_ptr.offset(tcp_data_offset as isize) };
-        let tcp_data = unsafe { slice::from_raw_parts(tcp_data_ptr as *mut u8, tcp_data_len) }
-            .to_vec();
+        let tcp_data =
+            unsafe { slice::from_raw_parts(tcp_data_ptr as *mut u8, tcp_data_len) }.to_vec();
         Ok(PacketDissector {
             ll_data: ll_data,
             etherhdr_ptr: etherhdr_ptr,

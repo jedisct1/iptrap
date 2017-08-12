@@ -1,5 +1,5 @@
 
-use super::libc::{c_void, c_char, c_int, timeval};
+use super::libc::{c_char, c_int, c_void, timeval};
 
 use std::ffi;
 use std::mem;
@@ -45,21 +45,23 @@ pub enum DataLinkType {
 
 #[link(name = "pcap")]
 extern "C" {
-    pub fn pcap_open_live(device: *const c_char,
-                          snaplen: c_int,
-                          promisc: c_int,
-                          to_ms: c_int,
-                          errbuf: *mut c_char)
-                          -> Pcap_;
+    pub fn pcap_open_live(
+        device: *const c_char,
+        snaplen: c_int,
+        promisc: c_int,
+        to_ms: c_int,
+        errbuf: *mut c_char,
+    ) -> Pcap_;
 
     pub fn pcap_close(pcap: Pcap_);
 
     pub fn pcap_datalink(pcap: Pcap_) -> c_int;
 
-    pub fn pcap_next_ex(pcap: Pcap_,
-                        pkthdr: *mut *const PacketHeader,
-                        ll_data: *mut *const u8)
-                        -> c_int;
+    pub fn pcap_next_ex(
+        pcap: Pcap_,
+        pkthdr: *mut *const PacketHeader,
+        ll_data: *mut *const u8,
+    ) -> c_int;
 
     pub fn pcap_sendpacket(pcap: Pcap_, ll_data: *const u8, len: c_int) -> c_int;
 }
@@ -70,8 +72,10 @@ impl Pcap {
         let device = ffi::CString::new(device.as_bytes()).unwrap().as_ptr();
         let pcap = unsafe { pcap_open_live(device, 65536, 1, 500, errbuf) };
         if pcap.is_null() {
-            return Err(unsafe { str::from_utf8(ffi::CStr::from_ptr(errbuf).to_bytes()).unwrap() }
-                .to_owned());
+            return Err(
+                unsafe { str::from_utf8(ffi::CStr::from_ptr(errbuf).to_bytes()).unwrap() }
+                    .to_owned(),
+            );
         }
         Ok(Pcap { pcap_: pcap })
     }
@@ -92,8 +96,8 @@ impl Pcap {
             1 => {
                 let packet_header = unsafe { *packet_header_pnt };
                 let ll_data_len = packet_header.caplen as usize;
-                let ll_data = unsafe { slice::from_raw_parts(ll_data_pnt as *mut u8, ll_data_len) }
-                    .to_vec();
+                let ll_data =
+                    unsafe { slice::from_raw_parts(ll_data_pnt as *mut u8, ll_data_len) }.to_vec();
                 Some(PcapPacket { ll_data: ll_data })
             }
             _ => None,
