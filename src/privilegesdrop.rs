@@ -1,4 +1,3 @@
-
 use libc::{c_int, c_void, gid_t, setgid, setuid, uid_t};
 
 pub fn switch_user(uid: Option<uid_t>, gid: Option<gid_t>) {

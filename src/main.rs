@@ -1,5 +1,8 @@
-
-#![warn(non_camel_case_types, non_upper_case_globals, unused_qualifications)]
+#![warn(
+    non_camel_case_types,
+    non_upper_case_globals,
+    unused_qualifications
+)]
 #[macro_use]
 extern crate log;
 
@@ -8,23 +11,23 @@ extern crate rustc_serialize;
 extern crate time;
 extern crate zmq;
 
-use iptrap::ETHERTYPE_IP;
-use iptrap::EmptyTcpPacket;
 use iptrap::privilegesdrop;
 use iptrap::strsliceescape::StrSliceEscape;
+use iptrap::EmptyTcpPacket;
+use iptrap::ETHERTYPE_IP;
+use iptrap::{checksum, cookie};
+use iptrap::{DataLinkType, Pcap, PcapPacket};
 use iptrap::{EtherHeader, IpHeader, TcpHeader};
 use iptrap::{PacketDissector, PacketDissectorFilter};
-use iptrap::{DataLinkType, Pcap, PcapPacket};
 use iptrap::{TH_ACK, TH_RST, TH_SYN};
-use iptrap::{checksum, cookie};
 use rustc_serialize::json::{Json, ToJson};
 use std::collections::HashMap;
 use std::env;
 use std::net::Ipv4Addr;
-use std::sync::Arc;
 use std::sync::atomic::Ordering::Relaxed;
 use std::sync::atomic::{AtomicBool, ATOMIC_BOOL_INIT};
 use std::sync::mpsc::{channel, Receiver, Sender};
+use std::sync::Arc;
 use std::thread;
 
 static STREAM_PORT: u16 = 9922;
@@ -129,9 +132,7 @@ fn log_tcp_ack(
     record.insert("ts".to_owned(), Json::U64(ts));
     record.insert(
         "ip_src".to_owned(),
-        Json::String(
-            format!("{}.{}.{}.{}", ip_src[0], ip_src[1], ip_src[2], ip_src[3]).to_owned(),
-        ),
+        Json::String(format!("{}.{}.{}.{}", ip_src[0], ip_src[1], ip_src[2], ip_src[3]).to_owned()),
     );
     record.insert("dport".to_owned(), Json::U64(dport as u64));
     record.insert(
@@ -227,8 +228,9 @@ fn main() {
         let th_flags = unsafe { *dissector.tcphdr_ptr }.th_flags;
         if th_flags == TH_SYN {
             send_tcp_synack(sk, &packetwriter_chan, &dissector, ts);
-        } else if (th_flags & TH_ACK) == TH_ACK && (th_flags & TH_SYN) == 0 &&
-            log_tcp_ack(&mut zmq_socket, sk, &dissector, ts)
+        } else if (th_flags & TH_ACK) == TH_ACK
+            && (th_flags & TH_SYN) == 0
+            && log_tcp_ack(&mut zmq_socket, sk, &dissector, ts)
         {
             send_tcp_rst(&packetwriter_chan, &dissector);
         }

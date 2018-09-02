@@ -1,4 +1,3 @@
-
 use super::libc::{c_char, c_int, c_void, timeval};
 
 use std::ffi;

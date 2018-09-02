@@ -1,4 +1,3 @@
-
 pub trait StrSliceEscape {
     fn escape_default_except_lf(&self) -> String;
 }

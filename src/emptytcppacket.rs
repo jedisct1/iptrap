@@ -1,4 +1,3 @@
-
 use packetdissector::{EtherHeader, IpHeader, TcpHeader};
 use packetdissector::{ETHERTYPE_IP, IPPROTO_TCP};
 use std::mem::size_of;
