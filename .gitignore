@@ -12,3 +12,4 @@
 build
 target
 Cargo.lock
+.travis.yml
