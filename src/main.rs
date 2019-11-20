@@ -1,8 +1,4 @@
-#![warn(
-    non_camel_case_types,
-    non_upper_case_globals,
-    unused_qualifications
-)]
+#![warn(non_camel_case_types, non_upper_case_globals, unused_qualifications)]
 #[macro_use]
 extern crate log;
 
@@ -24,8 +20,8 @@ use rustc_serialize::json::{Json, ToJson};
 use std::collections::HashMap;
 use std::env;
 use std::net::Ipv4Addr;
+use std::sync::atomic::AtomicBool;
 use std::sync::atomic::Ordering::Relaxed;
-use std::sync::atomic::{AtomicBool, ATOMIC_BOOL_INIT};
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::sync::Arc;
 use std::thread;
@@ -187,10 +183,8 @@ fn main() {
     let sk = cookie::SipHashKey::new();
     let filter = PacketDissectorFilter::new(local_ip);
     let pcap_arc = Arc::new(pcap);
-    let (packetwriter_chan, packetwriter_port): (
-        Sender<EmptyTcpPacket>,
-        Receiver<EmptyTcpPacket>,
-    ) = channel();
+    let (packetwriter_chan, packetwriter_port): (Sender<EmptyTcpPacket>, Receiver<EmptyTcpPacket>) =
+        channel();
     let pcap_arc0 = pcap_arc.clone();
     thread::spawn(move || {
         loop {
@@ -203,7 +197,7 @@ fn main() {
     let mut zmq_socket = zmq_ctx.socket(zmq::SocketType::PUB).unwrap();
     let _ = zmq_socket.set_linger(1);
     let _ = zmq_socket.bind(&format!("tcp://0.0.0.0:{}", STREAM_PORT));
-    static TIME_NEEDS_UPDATE: AtomicBool = ATOMIC_BOOL_INIT;
+    static TIME_NEEDS_UPDATE: AtomicBool = AtomicBool::new(false);
     spawn_time_updater(&TIME_NEEDS_UPDATE);
     let mut ts = time::get_time().sec as u64 & !0x3f;
     let mut pkt_opt: Option<PcapPacket>;

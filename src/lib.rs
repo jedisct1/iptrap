@@ -1,19 +1,14 @@
 #![crate_name = "iptrap"]
 #![crate_type = "lib"]
-#![warn(
-    non_camel_case_types,
-    non_upper_case_globals,
-    unused_qualifications
-)]
-#![feature(iterator_step_by)]
+#![warn(non_camel_case_types, non_upper_case_globals, unused_qualifications)]
 
 extern crate libc;
 
-pub use emptytcppacket::*;
-pub use packetdissector::*;
-pub use pcap::*;
-pub use privilegesdrop::*;
-pub use strsliceescape::*;
+pub use crate::emptytcppacket::*;
+pub use crate::packetdissector::*;
+pub use crate::pcap::*;
+pub use crate::privilegesdrop::*;
+pub use crate::strsliceescape::*;
 
 pub mod checksum;
 pub mod cookie;

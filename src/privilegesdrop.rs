@@ -2,9 +2,11 @@ use libc::{c_int, c_void, gid_t, setgid, setuid, uid_t};
 
 pub fn switch_user(uid: Option<uid_t>, gid: Option<gid_t>) {
     match gid {
-        Some(gid) => if unsafe { setgid(gid) } != 0 {
-            panic!("setgid()");
-        },
+        Some(gid) => {
+            if unsafe { setgid(gid) } != 0 {
+                panic!("setgid()");
+            }
+        }
         None => (),
     }
     match uid {

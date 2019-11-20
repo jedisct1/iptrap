@@ -1,4 +1,4 @@
-use packetdissector::{IpHeader, TcpHeader};
+use crate::packetdissector::{IpHeader, TcpHeader};
 use std::mem::size_of_val;
 use std::slice;
 
