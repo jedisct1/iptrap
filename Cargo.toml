@@ -34,3 +34,8 @@ version = "0.3"
 [lib]
 name = "iptrap"
 path = "src/lib.rs"
+
+[profile.release]
+codegen-units = 1
+incremental = false
+panic = "abort"
