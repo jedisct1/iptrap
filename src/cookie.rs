@@ -1,5 +1,5 @@
-extern crate rand;
-extern crate siphasher;
+use rand;
+use siphasher;
 
 use self::siphasher::sip::SipHasher13;
 use std::hash::{Hash, Hasher};

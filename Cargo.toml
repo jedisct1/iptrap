@@ -8,6 +8,7 @@ license = "ISC"
 homepage = "https://github.com/jedisct1/iptrap"
 repository = "https://github.com/jedisct1/iptrap"
 categories = ["command-line-utilities"]
+edition = "2018"
 
 [dependencies.zmq]
 version = "0.8"

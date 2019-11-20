@@ -2,7 +2,7 @@
 #![crate_type = "lib"]
 #![warn(non_camel_case_types, non_upper_case_globals, unused_qualifications)]
 
-extern crate libc;
+use libc;
 
 pub use crate::emptytcppacket::*;
 pub use crate::packetdissector::*;

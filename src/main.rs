@@ -2,10 +2,8 @@
 #[macro_use]
 extern crate log;
 
-extern crate iptrap;
-extern crate rustc_serialize;
-extern crate time;
-extern crate zmq;
+use time;
+use zmq;
 
 use iptrap::privilegesdrop;
 use iptrap::strsliceescape::StrSliceEscape;
