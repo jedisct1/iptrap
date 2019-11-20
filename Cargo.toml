@@ -1,7 +1,7 @@
 
 [package]
 name = "iptrap"
-version = "1.0.5"
+version = "1.0.6"
 authors = ["Frank Denis <github@pureftpd.org>"]
 description = "A fast, stateless TCP sinkhole"
 license = "ISC"
@@ -9,6 +9,7 @@ homepage = "https://github.com/jedisct1/iptrap"
 repository = "https://github.com/jedisct1/iptrap"
 categories = ["command-line-utilities"]
 edition = "2018"
+readme = "README.md"
 
 [dependencies.zmq]
 version = "0.9"
