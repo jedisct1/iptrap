@@ -11,7 +11,7 @@ categories = ["command-line-utilities"]
 edition = "2018"
 
 [dependencies.zmq]
-version = "0.8"
+version = "0.9"
 
 [dependencies.time]
 version = "0.1"
