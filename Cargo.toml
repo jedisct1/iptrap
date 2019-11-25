@@ -11,26 +11,14 @@ categories = ["command-line-utilities"]
 edition = "2018"
 readme = "README.md"
 
-[dependencies.zmq]
-version = "0.9"
-
-[dependencies.time]
-version = "0.1"
-
-[dependencies.rustc-serialize]
-version = "0.3"
-
-[dependencies.rand]
-version = "0.7"
-
-[dependencies.libc]
-version = "0.2"
-
-[dependencies.log]
-version = "0.4"
-
-[dependencies.siphasher]
-version = "0.3"
+[dependencies]
+zmq = "0.9"
+time = "0.1"
+rustc-serialize = "0.3"
+rand = "0.7"
+libc = "0.2"
+log = "0.4"
+siphasher = "0.3"
 
 [lib]
 name = "iptrap"
