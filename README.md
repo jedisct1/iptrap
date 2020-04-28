@@ -35,7 +35,7 @@ Starts the sinkhole. Although it requires root privileges in order to
 directly open the network interface, it also requires a non-root uid
 to drop its privileges as soon as possible.
 
-IPTrap listens to all TCP ports, with the exception of ports 22.
+IPTrap listens to all TCP ports, with the exception of port 22.
 
 The sinkhole logs are available as JSON data on a ZeroMQ PUB socket on
 port 9922.
