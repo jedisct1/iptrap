@@ -2,7 +2,6 @@
 #[macro_use]
 extern crate log;
 
-use time;
 use zmq;
 
 use iptrap::privilegesdrop;
@@ -18,8 +17,6 @@ use rustc_serialize::json::{Json, ToJson};
 use std::collections::HashMap;
 use std::env;
 use std::net::Ipv4Addr;
-use std::sync::atomic::AtomicBool;
-use std::sync::atomic::Ordering::Relaxed;
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::sync::Arc;
 use std::thread;
@@ -143,17 +140,6 @@ fn usage() {
     println!("Usage: iptrap <device> <local ip address> <uid> <gid>");
 }
 
-#[allow(unreachable_code, deprecated)]
-fn spawn_time_updater(time_needs_update: &'static AtomicBool) {
-    thread::spawn(move || {
-        loop {
-            time_needs_update.store(true, Relaxed);
-            thread::sleep_ms(10 * 1000);
-        }
-        ()
-    });
-}
-
 fn packet_should_be_bypassed(dissector: &PacketDissector) -> bool {
     let th_dport = unsafe { *dissector.tcphdr_ptr }.th_dport;
     th_dport == STREAM_PORT.to_be() || th_dport == SSH_PORT.to_be()
@@ -195,9 +181,7 @@ fn main() {
     let mut zmq_socket = zmq_ctx.socket(zmq::SocketType::PUB).unwrap();
     let _ = zmq_socket.set_linger(1);
     let _ = zmq_socket.bind(&format!("tcp://0.0.0.0:{}", STREAM_PORT));
-    static TIME_NEEDS_UPDATE: AtomicBool = AtomicBool::new(false);
-    spawn_time_updater(&TIME_NEEDS_UPDATE);
-    let mut ts = time::get_time().sec as u64 & !0x3f;
+    let updater = coarsetime::Updater::new(1000).start().unwrap();
     let mut pkt_opt: Option<PcapPacket>;
     while {
         pkt_opt = pcap_arc.next_packet();
@@ -213,10 +197,8 @@ fn main() {
         if packet_should_be_bypassed(&dissector) {
             continue;
         }
-        if TIME_NEEDS_UPDATE.load(Relaxed) != false {
-            TIME_NEEDS_UPDATE.store(false, Relaxed);
-            ts = time::get_time().sec as u64 & !0x3f;
-        }
+
+        let ts = coarsetime::Clock::recent_since_epoch().as_secs();
         let th_flags = unsafe { *dissector.tcphdr_ptr }.th_flags;
         if th_flags == TH_SYN {
             send_tcp_synack(sk, &packetwriter_chan, &dissector, ts);
@@ -227,4 +209,5 @@ fn main() {
             send_tcp_rst(&packetwriter_chan, &dissector);
         }
     }
+    updater.stop().unwrap();
 }
