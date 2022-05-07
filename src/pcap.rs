@@ -97,7 +97,7 @@ impl Pcap {
                 let ll_data_len = packet_header.caplen as usize;
                 let ll_data =
                     unsafe { slice::from_raw_parts(ll_data_pnt as *mut u8, ll_data_len) }.to_vec();
-                Some(PcapPacket { ll_data: ll_data })
+                Some(PcapPacket { ll_data })
             }
             _ => None,
         }

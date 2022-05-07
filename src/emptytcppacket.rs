@@ -47,10 +47,10 @@ impl EmptyTcpPacket {
             th_urp: 0u16,
         };
         EmptyTcpPacket {
-            etherhdr: etherhdr,
-            iphdr: iphdr,
-            tcphdr: tcphdr,
-            tcpoptions: tcpoptions,
+            etherhdr,
+            iphdr,
+            tcphdr,
+            tcpoptions,
         }
     }
 }

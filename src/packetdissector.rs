@@ -52,7 +52,7 @@ pub struct PacketDissectorFilter {
 
 impl PacketDissectorFilter {
     pub fn new(local_ip: Vec<u8>) -> PacketDissectorFilter {
-        PacketDissectorFilter { local_ip: local_ip }
+        PacketDissectorFilter { local_ip }
     }
 }
 
@@ -124,11 +124,11 @@ impl PacketDissector {
         let tcp_data =
             unsafe { slice::from_raw_parts(tcp_data_ptr as *mut u8, tcp_data_len) }.to_vec();
         Ok(PacketDissector {
-            ll_data: ll_data,
-            etherhdr_ptr: etherhdr_ptr,
-            iphdr_ptr: iphdr_ptr,
-            tcphdr_ptr: tcphdr_ptr,
-            tcp_data: tcp_data,
+            ll_data,
+            etherhdr_ptr,
+            iphdr_ptr,
+            tcphdr_ptr,
+            tcp_data,
         })
     }
 }

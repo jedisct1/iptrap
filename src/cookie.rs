@@ -38,11 +38,11 @@ pub fn tcp(
     uts: u64,
 ) -> u32 {
     let input = CookieInput {
-        ip_src: ip_src,
-        ip_dst: ip_dst,
-        th_sport: th_sport,
-        th_dport: th_dport,
-        uts: uts,
+        ip_src,
+        ip_dst,
+        th_sport,
+        th_dport,
+        uts,
     };
     let sip = &mut SipHasher13::new_with_keys(sk.k1, sk.k2);
     input.hash(sip);
