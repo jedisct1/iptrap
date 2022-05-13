@@ -2,7 +2,12 @@
 #[macro_use]
 extern crate log;
 
-use zmq;
+use std::collections::HashMap;
+use std::env;
+use std::net::Ipv4Addr;
+use std::sync::mpsc::{channel, Receiver, Sender};
+use std::sync::Arc;
+use std::thread;
 
 use iptrap::privilegesdrop;
 use iptrap::strsliceescape::StrSliceEscape;
@@ -14,12 +19,7 @@ use iptrap::{EtherHeader, IpHeader, TcpHeader};
 use iptrap::{PacketDissector, PacketDissectorFilter};
 use iptrap::{TH_ACK, TH_RST, TH_SYN};
 use rustc_serialize::json::{Json, ToJson};
-use std::collections::HashMap;
-use std::env;
-use std::net::Ipv4Addr;
-use std::sync::mpsc::{channel, Receiver, Sender};
-use std::sync::Arc;
-use std::thread;
+use zmq;
 
 static STREAM_PORT: u16 = 9922;
 static SSH_PORT: u16 = 22;

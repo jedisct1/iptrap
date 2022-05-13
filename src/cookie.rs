@@ -1,8 +1,9 @@
+use std::hash::{Hash, Hasher};
+
 use rand;
 use siphasher;
 
 use self::siphasher::sip::SipHasher13;
-use std::hash::{Hash, Hasher};
 
 #[derive(Copy, Clone)]
 pub struct SipHashKey {

@@ -1,6 +1,7 @@
-use crate::packetdissector::{IpHeader, TcpHeader};
 use std::mem::size_of_val;
 use std::slice;
+
+use crate::packetdissector::{IpHeader, TcpHeader};
 
 pub fn ip_header(iphdr: &mut IpHeader) {
     let iphdr_len = size_of_val(iphdr);

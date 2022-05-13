@@ -1,10 +1,10 @@
-use super::libc::{c_char, c_int, c_void, timeval};
-
 use std::ffi;
 use std::mem;
 use std::ptr;
 use std::slice;
 use std::str;
+
+use super::libc::{c_char, c_int, c_void, timeval};
 
 pub const PCAP_ERRBUF_SIZE: usize = 256;
 

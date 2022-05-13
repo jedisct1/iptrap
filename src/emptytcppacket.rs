@@ -1,8 +1,9 @@
-use crate::packetdissector::{EtherHeader, IpHeader, TcpHeader};
-use crate::packetdissector::{ETHERTYPE_IP, IPPROTO_TCP};
 use std::mem::size_of;
 
 use rand;
+
+use crate::packetdissector::{EtherHeader, IpHeader, TcpHeader};
+use crate::packetdissector::{ETHERTYPE_IP, IPPROTO_TCP};
 
 #[repr(packed)]
 #[derive(Copy, Clone)]
