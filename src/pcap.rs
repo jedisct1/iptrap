@@ -1,5 +1,4 @@
 use std::ffi;
-use std::mem;
 use std::ptr;
 use std::slice;
 use std::str;
@@ -105,7 +104,7 @@ impl Pcap {
 
     pub fn send_packet<T: Copy>(&self, data: &T) -> Result<(), &str> {
         let ll_data = data as *const T as *const u8;
-        let ll_data_len = mem::size_of_val(data);
+        let ll_data_len = size_of_val(data);
         match unsafe { pcap_sendpacket(self.pcap_, ll_data, ll_data_len as i32) } {
             0 => Ok(()),
             _ => Err("Unable to send packet"),

@@ -12,13 +12,13 @@ edition = "2018"
 readme = "README.md"
 
 [dependencies]
-zmq = "0.9"
+zmq = "0.10"
 coarsetime = "0.1"
 rustc-serialize = "0.3"
-rand = "0.8.0"
+rand = "0.8.5"
 libc = "0.2"
 log = "0.4"
-siphasher = "0.3"
+siphasher = "1.0"
 
 [lib]
 name = "iptrap"
