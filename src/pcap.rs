@@ -66,12 +66,12 @@ extern "C" {
 
 impl Pcap {
     pub fn open_live(device: &str) -> Result<Pcap, String> {
-        let errbuf = [0; PCAP_ERRBUF_SIZE].as_mut_ptr();
+        let mut errbuf = [0i8; PCAP_ERRBUF_SIZE];
         let device = ffi::CString::new(device.as_bytes()).unwrap();
-        let pcap = unsafe { pcap_open_live(device.as_ptr(), 65536, 1, 500, errbuf) };
+        let pcap = unsafe { pcap_open_live(device.as_ptr(), 65536, 1, 500, errbuf.as_mut_ptr()) };
         if pcap.is_null() {
             return Err(
-                unsafe { str::from_utf8(ffi::CStr::from_ptr(errbuf).to_bytes()).unwrap() }
+                unsafe { str::from_utf8(ffi::CStr::from_ptr(errbuf.as_ptr()).to_bytes()).unwrap() }
                     .to_owned(),
             );
         }
