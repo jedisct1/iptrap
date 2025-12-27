@@ -1,39 +1,54 @@
-IPtrap 2
-========
+# IPTrap 2
 
-A fast, stateless TCP sinkhole, implemented in Rust. Performs TCP handshakes
-on all ports and logs the initial payload.
+A fast, stateless TCP sinkhole implemented in Rust. Performs TCP handshakes on all ports and logs the initial payload.
 
-See [A sinkhole that never clogs](https://blog.opendns.com/2014/02/28/dns-sinkhole/)
-for an introduction.
+Uses SYN cookies to remain completely stateless - no per-connection memory is allocated, making it immune to SYN flood attacks.
 
-Dependencies:
+## Dependencies
 
 - libpcap-dev
 - libzmq3-dev or libzmq4-dev
 - Rust
 
-Compilation:
+## Building
 
-    git submodule update --init --recursive
-    cargo build --release
+```sh
+git submodule update --init --recursive
+cargo build --release
+```
 
-Usage
------
+The binary will be at `target/release/iptrap`.
 
-IPTrap implements its own TCP/IP stack, and the network interface it
-is listening on shouldn't have any IP address configured for the kernel.
+## Usage
 
-However, IPTrap doesn't respond to ARP requests: a tool such as `fakearpd` can
-be used for that purpose.
+```sh
+iptrap <device> <local ip address> <uid> <gid>
+```
 
-    iptrap <device> <local ip address> <uid> <gid>
-    
-Starts the sinkhole. Although it requires root privileges in order to
-directly open the network interface, it also requires a non-root uid
-to drop its privileges as soon as possible.
+IPTrap implements its own TCP/IP stack. The network interface must not have a kernel IP address configured.
 
-IPTrap listens to all TCP ports, with the exception of port 22.
+IPTrap does not respond to ARP requests. Use a tool like `fakearpd` for that purpose.
 
-The sinkhole logs are available as JSON data on a ZeroMQ PUB socket on
-port 9922.
+Requires root privileges to open the network interface, but immediately drops to the specified uid/gid.
+
+### Excluded Ports
+
+- Port 22 (SSH)
+- Port 9922 (ZeroMQ output)
+
+### Output
+
+Logs are published as JSON on a ZeroMQ PUB socket on port 9922.
+
+Example output:
+
+```json
+{"ts":1703698800,"ip_src":"192.168.1.100","dport":80,"payload":"GET / HTTP/1.1\r\nHost: example.com\r\n\r\n"}
+```
+
+Subscribe with any ZeroMQ SUB client:
+
+```sh
+# Using Python
+python3 -c "import zmq; ctx=zmq.Context(); s=ctx.socket(zmq.SUB); s.connect('tcp://127.0.0.1:9922'); s.setsockopt_string(zmq.SUBSCRIBE,''); print(s.recv_string())"
+```
