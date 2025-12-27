@@ -11,6 +11,12 @@ pub struct SipHashKey {
     k2: u64,
 }
 
+impl Default for SipHashKey {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl SipHashKey {
     pub fn new() -> SipHashKey {
         SipHashKey {

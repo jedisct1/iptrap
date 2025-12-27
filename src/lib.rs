@@ -2,8 +2,6 @@
 #![crate_type = "lib"]
 #![warn(non_camel_case_types, non_upper_case_globals, unused_qualifications)]
 
-use libc;
-
 pub use crate::emptytcppacket::*;
 pub use crate::packetdissector::*;
 pub use crate::pcap::*;

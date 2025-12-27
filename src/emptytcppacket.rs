@@ -5,13 +5,19 @@ use rand;
 use crate::packetdissector::{EtherHeader, IpHeader, TcpHeader};
 use crate::packetdissector::{ETHERTYPE_IP, IPPROTO_TCP};
 
-#[repr(packed)]
+#[repr(C, packed)]
 #[derive(Copy, Clone)]
 pub struct EmptyTcpPacket {
     pub etherhdr: EtherHeader,
     pub iphdr: IpHeader,
     pub tcphdr: TcpHeader,
     pub tcpoptions: [u8; 4],
+}
+
+impl Default for EmptyTcpPacket {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl EmptyTcpPacket {
@@ -35,7 +41,7 @@ impl EmptyTcpPacket {
             ip_src: [0u8; 4],
             ip_dst: [0u8; 4],
         };
-        assert!(tcpoptions.len() % 4 == 0);
+        assert!(tcpoptions.len().is_multiple_of(4));
         let tcphdr = TcpHeader {
             th_sport: 0u16,
             th_dport: 0u16,

@@ -9,7 +9,7 @@ pub static TH_RST: u8 = 0x04;
 pub static TH_ACK: u8 = 0x10;
 pub static TH_PUSH: u8 = 0x08;
 
-#[repr(packed)]
+#[repr(C, packed)]
 #[derive(Copy, Clone)]
 pub struct EtherHeader {
     pub ether_dhost: [u8; 6],
@@ -17,7 +17,7 @@ pub struct EtherHeader {
     pub ether_type: u16,
 }
 
-#[repr(packed)]
+#[repr(C, packed)]
 #[derive(Copy, Clone)]
 pub struct IpHeader {
     pub ip_vhl: u8,
@@ -32,7 +32,7 @@ pub struct IpHeader {
     pub ip_dst: [u8; 4],
 }
 
-#[repr(packed)]
+#[repr(C, packed)]
 #[derive(Clone, Copy)]
 pub struct TcpHeader {
     pub th_sport: u16,
@@ -72,7 +72,7 @@ impl PacketDissector {
         }
         let ll_data_ptr = ll_data.as_ptr();
         let etherhdr_ptr: *const EtherHeader = ll_data_ptr as *const EtherHeader;
-        let ref etherhdr = unsafe { *etherhdr_ptr };
+        let etherhdr = &unsafe { *etherhdr_ptr };
         if etherhdr.ether_type != ETHERTYPE_IP.to_be() {
             return Err("Unsupported type of ethernet frame");
         }
@@ -81,8 +81,8 @@ impl PacketDissector {
             return Err("Short IP packet");
         }
         let iphdr_ptr: *const IpHeader =
-            unsafe { ll_data_ptr.offset(iphdr_offset as isize) as *const IpHeader };
-        let ref iphdr: IpHeader = unsafe { *iphdr_ptr };
+            unsafe { ll_data_ptr.add(iphdr_offset) as *const IpHeader };
+        let iphdr: &IpHeader = &unsafe { *iphdr_ptr };
         let iphdr_len = (iphdr.ip_vhl & 0xf) as usize * 4;
         if iphdr_len < size_of::<IpHeader>() || ll_data_len - iphdr_offset < iphdr_len {
             return Err("Short IP packet");
@@ -102,8 +102,8 @@ impl PacketDissector {
             return Err("Short TCP packet");
         }
         let tcphdr_ptr: *const TcpHeader =
-            unsafe { ll_data_ptr.offset(tcphdr_offset as isize) as *const TcpHeader };
-        let ref tcphdr: TcpHeader = unsafe { *tcphdr_ptr };
+            unsafe { ll_data_ptr.add(tcphdr_offset) as *const TcpHeader };
+        let tcphdr: &TcpHeader = &unsafe { *tcphdr_ptr };
         let tcphdr_data_offset = ((tcphdr.th_off_x2 >> 4) & 0xf) as usize * 4;
         if tcphdr_data_offset < size_of::<TcpHeader>() {
             return Err("Short TCP data offset");
@@ -120,7 +120,7 @@ impl PacketDissector {
         let real_tcp_data_len = ip_len - iphdr_len - tcphdr_data_offset;
         let max_tcp_data_len = ll_data_len - tcp_data_offset;
         let tcp_data_len = std::cmp::min(real_tcp_data_len, max_tcp_data_len);
-        let tcp_data_ptr = unsafe { ll_data_ptr.offset(tcp_data_offset as isize) };
+        let tcp_data_ptr = unsafe { ll_data_ptr.add(tcp_data_offset) };
         let tcp_data =
             unsafe { slice::from_raw_parts(tcp_data_ptr as *mut u8, tcp_data_len) }.to_vec();
         Ok(PacketDissector {

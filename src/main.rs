@@ -18,7 +18,6 @@ use iptrap::{EtherHeader, IpHeader, TcpHeader};
 use iptrap::{PacketDissector, PacketDissectorFilter};
 use iptrap::{TH_ACK, TH_RST, TH_SYN};
 use serde_json::json;
-use zmq;
 
 static STREAM_PORT: u16 = 9922;
 static SSH_PORT: u16 = 22;
@@ -86,7 +85,7 @@ fn log_tcp_ack(
     dissector: &PacketDissector,
     ts: u64,
 ) -> bool {
-    if dissector.tcp_data.len() <= 0 {
+    if dissector.tcp_data.is_empty() {
         return false;
     }
     let s_iphdr: &IpHeader = &unsafe { *dissector.iphdr_ptr };
@@ -164,12 +163,9 @@ fn main() {
     let (packetwriter_chan, packetwriter_port): (Sender<EmptyTcpPacket>, Receiver<EmptyTcpPacket>) =
         channel();
     let pcap_arc0 = pcap_arc.clone();
-    thread::spawn(move || {
-        loop {
-            let pkt = packetwriter_port.recv().unwrap();
-            let _ = pcap_arc0.send_packet(&pkt);
-        }
-        ()
+    thread::spawn(move || loop {
+        let pkt = packetwriter_port.recv().unwrap();
+        let _ = pcap_arc0.send_packet(&pkt);
     });
     let zmq_ctx = zmq::Context::new();
     let mut zmq_socket = zmq_ctx.socket(zmq::SocketType::PUB).unwrap();
