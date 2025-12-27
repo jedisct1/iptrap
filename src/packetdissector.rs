@@ -114,7 +114,7 @@ impl PacketDissector {
         let tcp_data_offset = tcphdr_offset + tcphdr_data_offset;
 
         let ip_len = u16::from_be(iphdr.ip_len) as usize;
-        if ip_len < tcp_data_offset - tcp_data_offset {
+        if ip_len < iphdr_len + tcphdr_data_offset {
             return Err("Truncated TCP packet - truncated data");
         }
         let real_tcp_data_len = ip_len - iphdr_len - tcphdr_data_offset;

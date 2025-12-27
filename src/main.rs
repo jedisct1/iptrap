@@ -2,7 +2,6 @@
 #[macro_use]
 extern crate log;
 
-use std::collections::HashMap;
 use std::env;
 use std::net::Ipv4Addr;
 use std::sync::mpsc::{channel, Receiver, Sender};
@@ -18,7 +17,7 @@ use iptrap::{DataLinkType, Pcap, PcapPacket};
 use iptrap::{EtherHeader, IpHeader, TcpHeader};
 use iptrap::{PacketDissector, PacketDissectorFilter};
 use iptrap::{TH_ACK, TH_RST, TH_SYN};
-use rustc_serialize::json::{Json, ToJson};
+use serde_json::json;
 use zmq;
 
 static STREAM_PORT: u16 = 9922;
@@ -119,18 +118,13 @@ fn log_tcp_ack(
     let tcp_data_str = String::from_utf8_lossy(&dissector.tcp_data).into_owned();
     let ip_src = s_iphdr.ip_src;
     let dport = u16::from_be(s_tcphdr.th_dport);
-    let mut record: HashMap<String, Json> = HashMap::with_capacity(4);
-    record.insert("ts".to_owned(), Json::U64(ts));
-    record.insert(
-        "ip_src".to_owned(),
-        Json::String(format!("{}.{}.{}.{}", ip_src[0], ip_src[1], ip_src[2], ip_src[3]).to_owned()),
-    );
-    record.insert("dport".to_owned(), Json::U64(dport as u64));
-    record.insert(
-        "payload".to_owned(),
-        Json::String(tcp_data_str.escape_default_except_lf().to_owned()),
-    );
-    let json = record.to_json().to_string();
+    let record = json!({
+        "ts": ts,
+        "ip_src": format!("{}.{}.{}.{}", ip_src[0], ip_src[1], ip_src[2], ip_src[3]),
+        "dport": dport,
+        "payload": tcp_data_str.escape_default_except_lf()
+    });
+    let json = record.to_string();
     let _ = zmq_ctx.send(json.as_bytes(), 0);
     info!("{}", json);
     true
