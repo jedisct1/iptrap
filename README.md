@@ -1,5 +1,3 @@
-[![Build Status](https://travis-ci.org/jedisct1/iptrap.png?branch=master)](https://travis-ci.org/jedisct1/iptrap?branch=master)
-
 IPtrap 2
 ========
 
@@ -13,7 +11,7 @@ Dependencies:
 
 - libpcap-dev
 - libzmq3-dev or libzmq4-dev
-- rust-nightly
+- Rust
 
 Compilation:
 
