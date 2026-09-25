@@ -1,7 +1,8 @@
+
 [package]
 keywords = ["tcp", "honeypot", "sinkhole", "network", "security"]
 name = "iptrap"
-version = "1.0.9"
+version = "1.0.10"
 authors = ["Frank Denis <github@pureftpd.org>"]
 description = "Stateless TCP sinkhole and honeypot using SYN cookies, with initial payload capture and JSON logging"
 license = "ISC"
@@ -13,13 +14,13 @@ readme = "README.md"
 
 [dependencies]
 zmq = "0.10.0"
-coarsetime = "0.1.36"
-serde = "1.0.228"
-serde_json = "1.0.148"
-rand = "0.9.2"
-libc = "0.2.178"
-log = "0.4.29"
-siphasher = "1.0.1"
+coarsetime = "0.1.37"
+serde = "1.0.229"
+serde_json = "1.0.151"
+rand = "0.9.5"
+libc = "0.2.189"
+log = "0.4.34"
+siphasher = "1.0.3"
 
 [lib]
 name = "iptrap"
