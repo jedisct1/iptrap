@@ -1,9 +1,9 @@
-
 [package]
+keywords = ["tcp", "honeypot", "sinkhole", "network", "security"]
 name = "iptrap"
 version = "1.0.9"
 authors = ["Frank Denis <github@pureftpd.org>"]
-description = "A fast, stateless TCP sinkhole"
+description = "Stateless TCP sinkhole and honeypot using SYN cookies, with initial payload capture and JSON logging"
 license = "ISC"
 homepage = "https://github.com/jedisct1/iptrap"
 repository = "https://github.com/jedisct1/iptrap"
